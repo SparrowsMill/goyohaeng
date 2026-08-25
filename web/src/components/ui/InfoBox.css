@@ -1,0 +1,39 @@
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface-alt);
+}
+
+.info-box-primary {
+  background: var(--color-primary-soft);
+  border-color: #d9e2c4;
+}
+
+.info-box-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.info-box-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.info-box-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+}

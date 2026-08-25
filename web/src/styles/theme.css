@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&display=swap');
+
+:root {
+  --color-bg: #f3efe4;
+  --color-bg-soft: #ece5d4;
+  --color-surface: #fbf9f3;
+  --color-surface-alt: #f6f2e8;
+  --color-border: #e4dcc8;
+  --color-border-soft: #ece5d4;
+
+  --color-text: #2d2a20;
+  --color-text-soft: #6f6b5c;
+  --color-text-faint: #9b9686;
+
+  --color-primary: #5b6b34;
+  --color-primary-dark: #45521f;
+  --color-primary-soft: #e7ecd7;
+  --color-primary-soft-text: #4c5a2b;
+
+  --color-success: #4c7a4c;
+  --color-success-soft: #e2ecdd;
+
+  --color-warning: #b5852f;
+  --color-warning-soft: #f6ecd6;
+
+  --color-danger: #b6472c;
+  --color-danger-soft: #f8e0d6;
+
+  --color-info: #6b6b9a;
+  --color-info-soft: #e8e6f2;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-card: 0 2px 10px rgba(60, 50, 20, 0.06);
+  --shadow-pop: 0 12px 32px rgba(50, 42, 15, 0.14);
+
+  --font-sans: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Noto Serif KR', serif;
+
+  --sidebar-width: 224px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}

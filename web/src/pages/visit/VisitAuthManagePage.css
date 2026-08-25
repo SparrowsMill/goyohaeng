@@ -1,0 +1,151 @@
+.visit-toggle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 24px;
+}
+
+.visit-toggle-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.visit-toggle-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.visit-toggle-state {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.visit-toggle-hint {
+  font-size: 12px;
+  color: var(--color-text-faint);
+  line-height: 1.5;
+}
+
+.visit-hours-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.visit-toggle-note {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+  padding-left: 20px;
+  border-left: 1px solid var(--color-border-soft);
+}
+
+.session-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.session-filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface-alt);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.session-filter-tabs button {
+  border: none;
+  background: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.session-filter-tabs button.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.session-search {
+  width: 240px;
+}
+
+.session-search .field-input {
+  height: 38px;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.table-subtext {
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  position: relative;
+}
+
+.pagination button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.pagination button.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.pagination-count {
+  position: absolute;
+  right: 0;
+  font-size: 11.5px;
+  color: var(--color-text-faint);
+}
+
+.guide-bullets {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+  .visit-toggle-row {
+    grid-template-columns: 1fr;
+  }
+  .visit-toggle-note {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--color-border-soft);
+    padding-top: 12px;
+  }
+}

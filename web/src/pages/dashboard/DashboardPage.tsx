@@ -1,14 +1,232 @@
+import { Link } from "react-router-dom";
+import {
+  CalendarClock,
+  CheckCircle2,
+  AlertTriangle,
+  Star,
+  Pencil,
+  ChevronRight,
+  BarChart2,
+  ShieldCheck,
+  Settings,
+  Bell,
+  ExternalLink,
+} from "lucide-react";
+import PageHeader from "../../components/PageHeader";
+import StatCard from "../../components/StatCard";
+import Badge from "../../components/ui/Badge";
+import ComboChart from "../../components/charts/ComboChart";
+import "./DashboardPage.css";
+
+const recentActivity = [
+  { time: "2025-05-20 14:32:18", session: "SESSION-0520-0012", status: "방문 완료", tone: "success" as const },
+  { time: "2025-05-20 14:05:43", session: "SESSION-0520-0011", status: "인증 완료", tone: "success" as const },
+  { time: "2025-05-20 13:40:21", session: "SESSION-0520-0010", status: "대기 중", tone: "warning" as const },
+  { time: "2025-05-20 13:12:07", session: "SESSION-0520-0009", status: "인증 완료", tone: "success" as const },
+  { time: "2025-05-20 12:48:55", session: "SESSION-0520-0008", status: "만료", tone: "danger" as const },
+  { time: "2025-05-20 12:03:33", session: "SESSION-0520-0007", status: "인증 실패", tone: "danger" as const },
+];
+
+const upcoming = [
+  { session: "SESSION-0520-0015", remaining: "2시간 15분", window: "15:00 ~ 17:00" },
+  { session: "SESSION-0520-0014", remaining: "3시간 05분", window: "16:00 ~ 18:00" },
+  { session: "SESSION-0520-0013", remaining: "4시간 40분", window: "17:00 ~ 19:00" },
+  { session: "SESSION-0520-0012", remaining: "5시간 20분", window: "18:00 ~ 20:00" },
+];
+
+const trend = [
+  { label: "05/14 (수)", bar: 18, line: 8 },
+  { label: "05/15 (목)", bar: 24, line: 10 },
+  { label: "05/16 (금)", bar: 27, line: 13 },
+  { label: "05/17 (토)", bar: 19, line: 9 },
+  { label: "05/18 (일)", bar: 22, line: 11 },
+  { label: "05/19 (월)", bar: 29, line: 14 },
+  { label: "05/20 (화)", bar: 31, line: 12 },
+];
+
+const notices = [
+  { text: "5월 전통차 체험 프로그램이 승인되었습니다.", time: "09:00" },
+  { text: "방문 인증 완료 알림이 5건 발생했습니다.", time: "08:45" },
+  { text: "GAP Score가 전일 대비 3점 상승했습니다.", time: "08:30" },
+];
+
 export default function DashboardPage() {
   return (
-    <div>
-      <h1>관리자 대시보드</h1>
-      <ul>
-        <li>방문 예정 수</li>
-        <li>진행 중 인증 session 수</li>
-        <li>방문 인증 완료 수</li>
-        <li>인증 실패·만료 수</li>
-        <li>현재 갭지수</li>
-      </ul>
-    </div>
+    <>
+      <PageHeader
+        title="전주 한옥마을 관리자 대시보드"
+        subtitle="내 장소의 오늘 운영 현황을 한눈에 확인하세요."
+        showVisitToggle
+      />
+
+      <div className="grid grid-4" style={{ marginBottom: 20 }}>
+        <StatCard
+          icon={<CalendarClock size={19} />}
+          tone="primary"
+          label="방문 예정 현황"
+          hint="현재 방문 예정 상태이고 아직 만료되지 않은 인증 session 수"
+          value="12 건"
+        />
+        <StatCard icon={<CheckCircle2 size={19} />} tone="success" label="방문 인증 완료 수" value="31 건" />
+        <StatCard icon={<AlertTriangle size={19} />} tone="warning" label="인증 실패/만료 수" value="5 건" valueTone="warning" />
+        <StatCard icon={<Star size={19} />} tone="primary" label="현재 GAP Score" value="72" />
+      </div>
+
+      <div className="dashboard-columns">
+        <div className="stack">
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">최근 방문 인증 활동</h2>
+              <button className="panel-action">
+                전체 보기 <ChevronRight size={13} />
+              </button>
+            </div>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>시간</th>
+                    <th>세션 ID</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentActivity.map((row) => (
+                    <tr key={row.session}>
+                      <td>{row.time}</td>
+                      <td>{row.session}</td>
+                      <td>
+                        <Badge tone={row.tone}>{row.status}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">방문 예정 현황 (현재 세션)</h2>
+              <button className="panel-action">
+                전체 보기 <ChevronRight size={13} />
+              </button>
+            </div>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>세션</th>
+                    <th>남은 시간</th>
+                    <th>예정 방문 시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcoming.map((row) => (
+                    <tr key={row.session}>
+                      <td>{row.session}</td>
+                      <td>{row.remaining}</td>
+                      <td>{row.window}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">최근 7일 방문 인증 추이</h2>
+            </div>
+            <ComboChart data={trend} />
+          </section>
+        </div>
+
+        <div className="stack">
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">내 장소 정보 요약</h2>
+              <button className="panel-action">
+                <Pencil size={12} /> 수정
+              </button>
+            </div>
+            <dl className="place-summary">
+              <div>
+                <dt>장소 이름</dt>
+                <dd>전주 한옥마을</dd>
+              </div>
+              <div>
+                <dt>주소</dt>
+                <dd>전북 전주시 완산구 풍남동3가</dd>
+              </div>
+              <div>
+                <dt>카테고리</dt>
+                <dd>관광지</dd>
+              </div>
+              <div>
+                <dt>전화번호</dt>
+                <dd>063-123-4567</dd>
+              </div>
+              <div>
+                <dt>공식 홈페이지</dt>
+                <dd>
+                  <a href="#" onClick={(e) => e.preventDefault()}>
+                    jeonju-hanok.kr <ExternalLink size={11} />
+                  </a>
+                </dd>
+              </div>
+              <div>
+                <dt>운영 상태</dt>
+                <dd>
+                  <Badge tone="success">운영 중 · 실명제 방문 인증 제공</Badge>
+                </dd>
+              </div>
+            </dl>
+            <Link to="/places" className="place-summary-cta">
+              장소 관리로 이동 <ChevronRight size={14} />
+            </Link>
+          </section>
+
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">빠른 작업</h2>
+            </div>
+            <div className="quick-actions">
+              <Link to="/stats" className="quick-action-btn">
+                <BarChart2 size={16} /> 통계 데이터 보드 보기
+              </Link>
+              <Link to="/visit-auth" className="quick-action-btn">
+                <ShieldCheck size={16} /> 방문 인증 관리
+              </Link>
+              <Link to="/places" className="quick-action-btn">
+                <Pencil size={16} /> 장소 정보 수정
+              </Link>
+              <Link to="/settings" className="quick-action-btn">
+                <Settings size={16} /> 설정 열기
+              </Link>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">
+                <Bell size={15} /> 오늘 알림
+              </h2>
+            </div>
+            <ul className="notice-list">
+              {notices.map((n) => (
+                <li key={n.text}>
+                  <span>{n.text}</span>
+                  <time>{n.time}</time>
+                </li>
+              ))}
+            </ul>
+            <button className="place-summary-cta" style={{ background: "none", border: "none", width: "100%", cursor: "pointer" }}>
+              모든 알림 보기 <ChevronRight size={14} />
+            </button>
+          </section>
+        </div>
+      </div>
+    </>
   );
 }

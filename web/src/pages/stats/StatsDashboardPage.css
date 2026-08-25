@@ -1,0 +1,210 @@
+.gap-row {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1.6fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.gap-score-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.gap-score-value {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.gap-score-caption {
+  font-size: 12px;
+  color: var(--color-text-faint);
+  margin-top: auto;
+}
+
+.gap-basis-desc {
+  font-size: 12px;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.gap-metric {
+  margin-bottom: 14px;
+}
+
+.gap-metric:last-child {
+  margin-bottom: 0;
+}
+
+.gap-metric-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  margin-bottom: 6px;
+}
+
+.gap-metric-label span {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.progress-track {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.period-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface-alt);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.period-tabs button {
+  border: none;
+  background: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.period-tabs button.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.funnel-desc {
+  font-size: 12px;
+  color: var(--color-text-faint);
+  margin-top: 4px;
+}
+
+.funnel-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.funnel-steps {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.funnel-step {
+  flex: 1;
+  min-width: 190px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface-alt);
+}
+
+.funnel-step-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.funnel-step-label {
+  font-size: 12px;
+  color: var(--color-text-soft);
+  font-weight: 600;
+}
+
+.funnel-step-value {
+  margin-top: 3px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.funnel-arrow {
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+}
+
+.funnel-rate {
+  text-align: center;
+  padding-left: 20px;
+  border-left: 1px solid var(--color-border-soft);
+}
+
+.funnel-rate p:first-child {
+  font-size: 12.5px;
+  color: var(--color-text-soft);
+  font-weight: 600;
+}
+
+.funnel-rate-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-top: 4px;
+}
+
+.funnel-rate-sub {
+  font-size: 11.5px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+}
+
+.keyword-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.keyword-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.keyword-pill:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-soft-text);
+  border-color: transparent;
+}
+
+@media (max-width: 1100px) {
+  .gap-row {
+    grid-template-columns: 1fr;
+  }
+}

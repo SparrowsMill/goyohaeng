@@ -1,0 +1,25 @@
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.auth-header-icon {
+  color: var(--color-primary);
+  opacity: 0.75;
+}
+
+.auth-header-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.auth-header-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-soft);
+}

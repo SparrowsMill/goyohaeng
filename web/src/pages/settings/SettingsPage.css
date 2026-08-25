@@ -1,0 +1,125 @@
+.settings-field-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 12px;
+  color: var(--color-text-faint);
+}
+
+.account-manage-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.account-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+}
+
+.account-manage-item > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-manage-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  color: var(--color-text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-manage-icon.danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.account-manage-title {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.account-manage-desc {
+  font-size: 11.5px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+}
+
+.account-manage-item .btn {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 12.5px;
+  flex-shrink: 0;
+}
+
+.account-summary-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-summary-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text-soft);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.account-summary-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.account-summary-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  color: var(--color-text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-summary-list li strong {
+  margin-left: auto;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.account-summary-list li .badge {
+  margin-left: auto;
+}
+
+@media (max-width: 1100px) {
+  .account-manage-row {
+    grid-template-columns: 1fr;
+  }
+}

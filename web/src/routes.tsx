@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout";
+import AuthLayout from "./layouts/AuthLayout";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupRequestPage from "./pages/auth/SignupRequestPage";
 import ApprovalStatusPage from "./pages/auth/ApprovalStatusPage";
@@ -14,10 +15,32 @@ import PlaceManagePage from "./pages/place/PlaceManagePage";
 import SettingsPage from "./pages/settings/SettingsPage";
 
 export const router = createBrowserRouter([
-  { path: "/login", element: <LoginPage /> },
-  { path: "/signup", element: <SignupRequestPage /> },
-  { path: "/approval-pending", element: <ApprovalStatusPage status="pending" /> },
-  { path: "/approval-rejected", element: <ApprovalStatusPage status="rejected" /> },
+  { path: "/login", element: <AuthLayout><LoginPage /></AuthLayout> },
+  { path: "/signup", element: <AuthLayout><SignupRequestPage /></AuthLayout> },
+  {
+    path: "/approval-pending",
+    element: (
+      <AuthLayout>
+        <ApprovalStatusPage status="pending" />
+      </AuthLayout>
+    ),
+  },
+  {
+    path: "/approval-rejected",
+    element: (
+      <AuthLayout>
+        <ApprovalStatusPage status="rejected" />
+      </AuthLayout>
+    ),
+  },
+  {
+    path: "/approval-approved",
+    element: (
+      <AuthLayout>
+        <ApprovalStatusPage status="approved" />
+      </AuthLayout>
+    ),
+  },
   {
     path: "/",
     element: <AdminLayout />,
