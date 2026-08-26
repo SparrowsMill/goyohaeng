@@ -6,6 +6,7 @@ import StatCard from "../../components/StatCard";
 import Badge from "../../components/ui/Badge";
 import Toggle from "../../components/ui/Toggle";
 import Table from "../../components/ui/Table";
+import Pagination from "../../components/ui/Pagination";
 import DonutChart from "../../components/charts/DonutChart";
 import "./VisitAuthManagePage.css";
 
@@ -31,12 +32,28 @@ export default function VisitAuthManagePage() {
   const [visitOn, setVisitOn] = useState(true);
   const [filter, setFilter] = useState("전체");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 3;
 
   const filteredSessions = sessions.filter((s) => {
     const matchesFilter = filter === "전체" || s.status === filter;
     const matchesSearch = search.trim() === "" || s.code.includes(search) || s.status.includes(search);
     return matchesFilter && matchesSearch;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredSessions.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pagedSessions = filteredSessions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const updateFilter = (f: string) => {
+    setFilter(f);
+    setPage(1);
+  };
+
+  const updateSearch = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   return (
     <>
@@ -90,7 +107,7 @@ export default function VisitAuthManagePage() {
           <div className="session-toolbar">
             <div className="session-filter-tabs">
               {filters.map((f) => (
-                <button key={f} className={filter === f ? "active" : ""} onClick={() => setFilter(f)}>
+                <button key={f} className={filter === f ? "active" : ""} onClick={() => updateFilter(f)}>
                   {f}
                 </button>
               ))}
@@ -103,14 +120,14 @@ export default function VisitAuthManagePage() {
                 className="field-input"
                 placeholder="인증번호 또는 상태 검색"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => updateSearch(e.target.value)}
               />
             </div>
           </div>
 
           <Table
             rowKey={(s) => s.code}
-            data={filteredSessions}
+            data={pagedSessions}
             emptyMessage="조건에 맞는 인증 세션이 없습니다."
             columns={[
               { key: "code", header: "6자리 인증번호", className: "mono", render: (s) => s.code },
@@ -139,14 +156,13 @@ export default function VisitAuthManagePage() {
             ]}
           />
 
-          <div className="pagination">
-            {[1, 2, 3, 4].map((p) => (
-              <button key={p} className={p === 1 ? "active" : ""}>
-                {p}
-              </button>
-            ))}
-            <span className="pagination-count">1-6 of 6</span>
-          </div>
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            totalCount={filteredSessions.length}
+            pageSize={pageSize}
+            onPageChange={setPage}
+          />
         </section>
 
         <div className="stack">

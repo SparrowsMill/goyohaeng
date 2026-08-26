@@ -94,39 +94,6 @@
   color: var(--color-text-faint);
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 16px;
-  position: relative;
-}
-
-.pagination button {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--color-text-soft);
-}
-
-.pagination button.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-}
-
-.pagination-count {
-  position: absolute;
-  right: 0;
-  font-size: 11.5px;
-  color: var(--color-text-faint);
-}
-
 .guide-bullets {
   margin: 8px 0 0;
   padding-left: 18px;
