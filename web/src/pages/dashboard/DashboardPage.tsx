@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   CalendarClock,
@@ -16,6 +17,7 @@ import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import Badge from "../../components/ui/Badge";
 import Table from "../../components/ui/Table";
+import Skeleton from "../../components/ui/Skeleton";
 import ComboChart from "../../components/charts/ComboChart";
 import "./DashboardPage.css";
 
@@ -52,6 +54,13 @@ const notices = [
 ];
 
 export default function DashboardPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <PageHeader
@@ -61,16 +70,22 @@ export default function DashboardPage() {
       />
 
       <div className="grid grid-4" style={{ marginBottom: 20 }}>
-        <StatCard
-          icon={<CalendarClock size={19} />}
-          tone="primary"
-          label="방문 예정 현황"
-          hint="현재 방문 예정 상태이고 아직 만료되지 않은 인증 session 수"
-          value="12 건"
-        />
-        <StatCard icon={<CheckCircle2 size={19} />} tone="success" label="방문 인증 완료 수" value="31 건" />
-        <StatCard icon={<AlertTriangle size={19} />} tone="warning" label="인증 실패/만료 수" value="5 건" valueTone="warning" />
-        <StatCard icon={<Star size={19} />} tone="primary" label="현재 GAP Score" value="72" />
+        {isLoading ? (
+          Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={78} radius="var(--radius-md)" />)
+        ) : (
+          <>
+            <StatCard
+              icon={<CalendarClock size={19} />}
+              tone="primary"
+              label="방문 예정 현황"
+              hint="현재 방문 예정 상태이고 아직 만료되지 않은 인증 session 수"
+              value="12 건"
+            />
+            <StatCard icon={<CheckCircle2 size={19} />} tone="success" label="방문 인증 완료 수" value="31 건" />
+            <StatCard icon={<AlertTriangle size={19} />} tone="warning" label="인증 실패/만료 수" value="5 건" valueTone="warning" />
+            <StatCard icon={<Star size={19} />} tone="primary" label="현재 GAP Score" value="72" />
+          </>
+        )}
       </div>
 
       <div className="dashboard-columns">
@@ -82,15 +97,23 @@ export default function DashboardPage() {
                 전체 보기 <ChevronRight size={13} />
               </button>
             </div>
-            <Table
-              rowKey={(row) => row.session}
-              data={recentActivity}
-              columns={[
-                { key: "time", header: "시간", render: (row) => row.time },
-                { key: "session", header: "세션 ID", render: (row) => row.session },
-                { key: "status", header: "상태", render: (row) => <Badge tone={row.tone}>{row.status}</Badge> },
-              ]}
-            />
+            {isLoading ? (
+              <div className="stack" style={{ gap: 10 }}>
+                {Array.from({ length: 4 }, (_, i) => (
+                  <Skeleton key={i} height={20} />
+                ))}
+              </div>
+            ) : (
+              <Table
+                rowKey={(row) => row.session}
+                data={recentActivity}
+                columns={[
+                  { key: "time", header: "시간", render: (row) => row.time },
+                  { key: "session", header: "세션 ID", render: (row) => row.session },
+                  { key: "status", header: "상태", render: (row) => <Badge tone={row.tone}>{row.status}</Badge> },
+                ]}
+              />
+            )}
           </section>
 
           <section className="panel">
@@ -100,15 +123,23 @@ export default function DashboardPage() {
                 전체 보기 <ChevronRight size={13} />
               </button>
             </div>
-            <Table
-              rowKey={(row) => row.session}
-              data={upcoming}
-              columns={[
-                { key: "session", header: "세션", render: (row) => row.session },
-                { key: "remaining", header: "남은 시간", render: (row) => row.remaining },
-                { key: "window", header: "예정 방문 시간", render: (row) => row.window },
-              ]}
-            />
+            {isLoading ? (
+              <div className="stack" style={{ gap: 10 }}>
+                {Array.from({ length: 4 }, (_, i) => (
+                  <Skeleton key={i} height={20} />
+                ))}
+              </div>
+            ) : (
+              <Table
+                rowKey={(row) => row.session}
+                data={upcoming}
+                columns={[
+                  { key: "session", header: "세션", render: (row) => row.session },
+                  { key: "remaining", header: "남은 시간", render: (row) => row.remaining },
+                  { key: "window", header: "예정 방문 시간", render: (row) => row.window },
+                ]}
+              />
+            )}
           </section>
 
           <section className="panel">

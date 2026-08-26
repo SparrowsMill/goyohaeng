@@ -7,6 +7,7 @@ import Badge from "../../components/ui/Badge";
 import Toggle from "../../components/ui/Toggle";
 import Table from "../../components/ui/Table";
 import Pagination from "../../components/ui/Pagination";
+import EmptyState from "../../components/ui/EmptyState";
 import DonutChart from "../../components/charts/DonutChart";
 import "./VisitAuthManagePage.css";
 
@@ -128,7 +129,13 @@ export default function VisitAuthManagePage() {
           <Table
             rowKey={(s) => s.code}
             data={pagedSessions}
-            emptyMessage="조건에 맞는 인증 세션이 없습니다."
+            emptyMessage={
+              <EmptyState
+                icon={<Search size={18} />}
+                title="조건에 맞는 인증 세션이 없습니다."
+                description="필터나 검색어를 변경해보세요."
+              />
+            }
             columns={[
               { key: "code", header: "6자리 인증번호", className: "mono", render: (s) => s.code },
               {

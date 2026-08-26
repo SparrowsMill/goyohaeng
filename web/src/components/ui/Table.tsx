@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Inbox } from "lucide-react";
+import EmptyState from "./EmptyState";
 
 export interface TableColumn<T> {
   key: string;
@@ -14,7 +16,12 @@ interface TableProps<T> {
   emptyMessage?: ReactNode;
 }
 
-export default function Table<T>({ columns, data, rowKey, emptyMessage = "표시할 데이터가 없습니다." }: TableProps<T>) {
+export default function Table<T>({
+  columns,
+  data,
+  rowKey,
+  emptyMessage = <EmptyState icon={<Inbox size={18} />} title="표시할 데이터가 없습니다." />,
+}: TableProps<T>) {
   return (
     <div className="table-wrap">
       <table className="data-table">
