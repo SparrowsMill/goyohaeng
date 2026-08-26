@@ -4,9 +4,12 @@ import { RouterProvider } from 'react-router-dom'
 import './styles/theme.css'
 import './styles/admin.css'
 import { router } from './routes'
+import { ToastProvider } from './components/ui/Toast'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
   </StrictMode>,
 )

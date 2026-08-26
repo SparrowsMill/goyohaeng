@@ -4,6 +4,7 @@ import { FileText, User, Gift, Clock, Camera, Trash2, ChevronRight } from "lucid
 import PageHeader from "../../components/PageHeader";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
+import { useToast } from "../../components/ui/Toast";
 import "./PlaceManagePage.css";
 
 const hoursSummary = [
@@ -19,6 +20,7 @@ const hoursSummary = [
 
 export default function PlaceManagePage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const { showToast } = useToast();
 
   return (
     <>
@@ -134,8 +136,10 @@ export default function PlaceManagePage() {
       <div className="place-footer">
         <p>* 표시는 필수 입력 항목입니다.</p>
         <div className="report-actions">
-          <Button variant="secondary">변경 취소</Button>
-          <Button>저장</Button>
+          <Button variant="secondary" onClick={() => showToast("변경 사항을 취소했습니다.", "info")}>
+            변경 취소
+          </Button>
+          <Button onClick={() => showToast("장소 정보가 저장되었습니다.", "success")}>저장</Button>
         </div>
       </div>
 
@@ -149,7 +153,13 @@ export default function PlaceManagePage() {
             <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
               취소
             </Button>
-            <Button variant="danger" onClick={() => setDeleteOpen(false)}>
+            <Button
+              variant="danger"
+              onClick={() => {
+                setDeleteOpen(false);
+                showToast("대표 사진이 삭제되었습니다.", "success");
+              }}
+            >
               삭제
             </Button>
           </>

@@ -3,6 +3,7 @@ import { Sparkles, ExternalLink, MessageCircle, TrendingUp, Flag } from "lucide-
 import PageHeader from "../../components/PageHeader";
 import DonutChart from "../../components/charts/DonutChart";
 import Button from "../../components/ui/Button";
+import { useToast } from "../../components/ui/Toast";
 import "./MonitoringPage.css";
 
 const topKeywords = [
@@ -36,6 +37,7 @@ const reportTypes = ["우리 매장과 관련 없는 게시물", "링크 오류"
 
 export default function MonitoringPage() {
   const [reportType, setReportType] = useState(reportTypes[0]);
+  const { showToast } = useToast();
 
   return (
     <>
@@ -133,7 +135,11 @@ export default function MonitoringPage() {
           신고 접수 후 운영팀에서 검토하여 조치하겠습니다.
         </p>
         <div className="report-inline">
-          <Button variant="primary" icon={<Flag size={15} />}>
+          <Button
+            variant="primary"
+            icon={<Flag size={15} />}
+            onClick={() => showToast("신고가 접수되었습니다. 운영팀에서 검토 후 조치할게요.", "success")}
+          >
             정보 오류 신고
           </Button>
           <div className="report-radio-group">
