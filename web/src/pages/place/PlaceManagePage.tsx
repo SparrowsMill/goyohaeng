@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FileText, User, Gift, Clock, Camera, Trash2, ChevronRight } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
 import "./PlaceManagePage.css";
 
 const hoursSummary = [
@@ -16,6 +18,8 @@ const hoursSummary = [
 ];
 
 export default function PlaceManagePage() {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
   return (
     <>
       <PageHeader title="장소 관리" subtitle="장소 정보를 관리하고 방문 혜택과 운영 정보를 설정합니다." />
@@ -76,7 +80,7 @@ export default function PlaceManagePage() {
                 <button className="btn btn-secondary" type="button">
                   <Camera size={14} /> 사진 변경
                 </button>
-                <button className="btn btn-danger" type="button">
+                <button className="btn btn-danger" type="button" onClick={() => setDeleteOpen(true)}>
                   <Trash2 size={14} /> 삭제
                 </button>
               </div>
@@ -134,6 +138,23 @@ export default function PlaceManagePage() {
           <Button>저장</Button>
         </div>
       </div>
+
+      <Modal
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title="대표 사진을 삭제할까요?"
+        description="삭제한 사진은 복구할 수 없습니다. 계속 진행하시겠습니까?"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
+              취소
+            </Button>
+            <Button variant="danger" onClick={() => setDeleteOpen(false)}>
+              삭제
+            </Button>
+          </>
+        }
+      />
     </>
   );
 }
