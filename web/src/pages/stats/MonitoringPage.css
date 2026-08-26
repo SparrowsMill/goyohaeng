@@ -176,3 +176,10 @@
     gap: 4px;
   }
 }
+
+@media (max-width: 480px) {
+  .keyword-top-grid,
+  .mention-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

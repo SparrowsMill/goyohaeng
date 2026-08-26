@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Home, BarChart2, ShieldCheck, Building2, Settings, LogOut, Mountain } from "lucide-react";
+import { Home, BarChart2, ShieldCheck, Building2, Settings, LogOut, Mountain, Menu, X } from "lucide-react";
 import "./AdminLayout.css";
 
 const NAV_ITEMS = [
@@ -12,23 +13,54 @@ const NAV_ITEMS = [
 
 export default function AdminLayout() {
   const { pathname } = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isActive = (matchers: string[]) =>
     matchers.some((m) => (m === "/" ? pathname === "/" : pathname.startsWith(m)));
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <div className="admin-topbar">
+        <button
+          type="button"
+          className="admin-topbar-menu-btn"
+          aria-label="메뉴 열기"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <Menu size={20} />
+        </button>
+        <span className="admin-sidebar-logo-icon">
+          <Mountain size={16} strokeWidth={2.2} />
+        </span>
+        <span>고요행 관리자</span>
+      </div>
+
+      {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
+      <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="admin-sidebar-logo">
           <span className="admin-sidebar-logo-icon">
             <Mountain size={18} strokeWidth={2.2} />
           </span>
           <span>고요행 관리자</span>
+          <button
+            type="button"
+            className="admin-sidebar-close-btn"
+            aria-label="메뉴 닫기"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <nav className="admin-nav">
           {NAV_ITEMS.map(({ label, to, icon: Icon, match }) => (
-            <Link key={to} to={to} className={`admin-nav-item ${isActive(match) ? "active" : ""}`}>
+            <Link
+              key={to}
+              to={to}
+              className={`admin-nav-item ${isActive(match) ? "active" : ""}`}
+              onClick={() => setSidebarOpen(false)}
+            >
               <Icon size={17} strokeWidth={2} />
               {label}
             </Link>

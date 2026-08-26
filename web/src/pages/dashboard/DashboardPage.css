@@ -11,6 +11,12 @@
   }
 }
 
+@media (max-width: 480px) {
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 .place-summary {
   display: flex;
   flex-direction: column;
