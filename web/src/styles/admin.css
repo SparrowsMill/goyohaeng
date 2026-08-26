@@ -95,6 +95,16 @@
   background: var(--color-surface-alt);
 }
 
+.data-table-empty {
+  text-align: center;
+  color: var(--color-text-faint);
+  padding: 32px 12px;
+}
+
+.data-table-empty:hover {
+  background: none;
+}
+
 .link-btn {
   background: none;
   border: none;

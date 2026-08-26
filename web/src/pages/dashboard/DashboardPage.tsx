@@ -15,6 +15,7 @@ import {
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import Badge from "../../components/ui/Badge";
+import Table from "../../components/ui/Table";
 import ComboChart from "../../components/charts/ComboChart";
 import "./DashboardPage.css";
 
@@ -81,28 +82,15 @@ export default function DashboardPage() {
                 전체 보기 <ChevronRight size={13} />
               </button>
             </div>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>시간</th>
-                    <th>세션 ID</th>
-                    <th>상태</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentActivity.map((row) => (
-                    <tr key={row.session}>
-                      <td>{row.time}</td>
-                      <td>{row.session}</td>
-                      <td>
-                        <Badge tone={row.tone}>{row.status}</Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              rowKey={(row) => row.session}
+              data={recentActivity}
+              columns={[
+                { key: "time", header: "시간", render: (row) => row.time },
+                { key: "session", header: "세션 ID", render: (row) => row.session },
+                { key: "status", header: "상태", render: (row) => <Badge tone={row.tone}>{row.status}</Badge> },
+              ]}
+            />
           </section>
 
           <section className="panel">
@@ -112,26 +100,15 @@ export default function DashboardPage() {
                 전체 보기 <ChevronRight size={13} />
               </button>
             </div>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>세션</th>
-                    <th>남은 시간</th>
-                    <th>예정 방문 시간</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {upcoming.map((row) => (
-                    <tr key={row.session}>
-                      <td>{row.session}</td>
-                      <td>{row.remaining}</td>
-                      <td>{row.window}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              rowKey={(row) => row.session}
+              data={upcoming}
+              columns={[
+                { key: "session", header: "세션", render: (row) => row.session },
+                { key: "remaining", header: "남은 시간", render: (row) => row.remaining },
+                { key: "window", header: "예정 방문 시간", render: (row) => row.window },
+              ]}
+            />
           </section>
 
           <section className="panel">

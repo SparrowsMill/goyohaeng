@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import Badge from "../../components/ui/Badge";
 import Toggle from "../../components/ui/Toggle";
+import Table from "../../components/ui/Table";
 import DonutChart from "../../components/charts/DonutChart";
 import "./VisitAuthManagePage.css";
 
@@ -29,6 +30,13 @@ const flowSegments = [
 export default function VisitAuthManagePage() {
   const [visitOn, setVisitOn] = useState(true);
   const [filter, setFilter] = useState("전체");
+  const [search, setSearch] = useState("");
+
+  const filteredSessions = sessions.filter((s) => {
+    const matchesFilter = filter === "전체" || s.status === filter;
+    const matchesSearch = search.trim() === "" || s.code.includes(search) || s.status.includes(search);
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <>
@@ -91,44 +99,45 @@ export default function VisitAuthManagePage() {
               <span className="field-icon">
                 <Search size={14} />
               </span>
-              <input className="field-input" placeholder="인증번호 또는 상태 검색" />
+              <input
+                className="field-input"
+                placeholder="인증번호 또는 상태 검색"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
           </div>
 
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>6자리 인증번호</th>
-                  <th>인증 완료 시간</th>
-                  <th>상태</th>
-                  <th>정상/방문 예정 시간</th>
-                  <th>작업</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map((s) => (
-                  <tr key={s.code}>
-                    <td className="mono">{s.code}</td>
-                    <td>
-                      {s.expiresAt}
-                      <br />
-                      <span className="table-subtext">{s.countdown}</span>
-                    </td>
-                    <td>
-                      <Badge tone={s.tone}>{s.status}</Badge>
-                    </td>
-                    <td>{s.scheduled}</td>
-                    <td>
-                      <Link to={`/visit-auth/${s.code}`} className="link-btn">
-                        상세보기 <ChevronRight size={12} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table
+            rowKey={(s) => s.code}
+            data={filteredSessions}
+            emptyMessage="조건에 맞는 인증 세션이 없습니다."
+            columns={[
+              { key: "code", header: "6자리 인증번호", className: "mono", render: (s) => s.code },
+              {
+                key: "expiresAt",
+                header: "인증 완료 시간",
+                render: (s) => (
+                  <>
+                    {s.expiresAt}
+                    <br />
+                    <span className="table-subtext">{s.countdown}</span>
+                  </>
+                ),
+              },
+              { key: "status", header: "상태", render: (s) => <Badge tone={s.tone}>{s.status}</Badge> },
+              { key: "scheduled", header: "정상/방문 예정 시간", render: (s) => s.scheduled },
+              {
+                key: "actions",
+                header: "작업",
+                render: (s) => (
+                  <Link to={`/visit-auth/${s.code}`} className="link-btn">
+                    상세보기 <ChevronRight size={12} />
+                  </Link>
+                ),
+              },
+            ]}
+          />
 
           <div className="pagination">
             {[1, 2, 3, 4].map((p) => (

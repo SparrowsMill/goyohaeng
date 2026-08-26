@@ -3,6 +3,7 @@ import { IdCard, CalendarClock, Timer, ShieldCheck, Gift, Info } from "lucide-re
 import PageHeader from "../../components/PageHeader";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
+import Table from "../../components/ui/Table";
 import "./VisitAuthConfirmPage.css";
 
 const history = [
@@ -145,34 +146,18 @@ export default function VisitAuthConfirmPage() {
 
       <section className="panel" style={{ marginTop: 20 }}>
         <p className="panel-title">최근 처리 이력</p>
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>인증 번호</th>
-                <th>방문자 닉네임</th>
-                <th>상태</th>
-                <th>생성 시각</th>
-                <th>처리 시각</th>
-                <th>처리자</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((h) => (
-                <tr key={h.code}>
-                  <td className="mono">{h.code}</td>
-                  <td>{h.nickname}</td>
-                  <td>
-                    <Badge tone={h.tone}>{h.status}</Badge>
-                  </td>
-                  <td>{h.created}</td>
-                  <td>{h.processed}</td>
-                  <td>{h.by}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          rowKey={(h) => h.code}
+          data={history}
+          columns={[
+            { key: "code", header: "인증 번호", className: "mono", render: (h) => h.code },
+            { key: "nickname", header: "방문자 닉네임", render: (h) => h.nickname },
+            { key: "status", header: "상태", render: (h) => <Badge tone={h.tone}>{h.status}</Badge> },
+            { key: "created", header: "생성 시각", render: (h) => h.created },
+            { key: "processed", header: "처리 시각", render: (h) => h.processed },
+            { key: "by", header: "처리자", render: (h) => h.by },
+          ]}
+        />
       </section>
     </>
   );

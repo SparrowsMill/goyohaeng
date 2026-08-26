@@ -6,6 +6,7 @@ import Toggle from "../../components/ui/Toggle";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import InfoBox from "../../components/ui/InfoBox";
+import Table from "../../components/ui/Table";
 import "./OperatingHoursPage.css";
 
 const days = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일", "공휴일"];
@@ -205,29 +206,17 @@ export default function OperatingHoursPage() {
             </table>
           </div>
         ) : (
-          <div className="table-wrap" style={{ marginTop: 16 }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>요일</th>
-                  <th>사용 여부</th>
-                  <th>시작 시간</th>
-                  <th>종료 시간</th>
-                </tr>
-              </thead>
-              <tbody>
-                {days.map((d) => (
-                  <tr key={d}>
-                    <td>{d}</td>
-                    <td>
-                      <Toggle checked size="sm" />
-                    </td>
-                    <td>{customHours[d].open}</td>
-                    <td>{customHours[d].close}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ marginTop: 16 }}>
+            <Table
+              rowKey={(d) => d}
+              data={days}
+              columns={[
+                { key: "day", header: "요일", render: (d) => d },
+                { key: "enabled", header: "사용 여부", render: () => <Toggle checked size="sm" /> },
+                { key: "open", header: "시작 시간", render: (d) => customHours[d].open },
+                { key: "close", header: "종료 시간", render: (d) => customHours[d].close },
+              ]}
+            />
           </div>
         )}
       </section>
