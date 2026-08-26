@@ -13,6 +13,7 @@ import VisitAuthConfirmPage from "./pages/visit/VisitAuthConfirmPage";
 import OperatingHoursPage from "./pages/visit/OperatingHoursPage";
 import PlaceManagePage from "./pages/place/PlaceManagePage";
 import SettingsPage from "./pages/settings/SettingsPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <AuthLayout><LoginPage /></AuthLayout> },
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
       { path: "visit-auth/hours", element: <OperatingHoursPage /> },
       { path: "places", element: <PlaceManagePage /> },
       { path: "settings", element: <SettingsPage /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);
