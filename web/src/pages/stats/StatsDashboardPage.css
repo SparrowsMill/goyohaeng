@@ -1,3 +1,19 @@
+.admin-content:has(> .stats-page) {
+  padding-bottom: 24px;
+}
+
+.stats-page .page-header {
+  margin-bottom: 16px;
+}
+
+.stats-page .panel {
+  padding: 14px 16px;
+}
+
+.stats-page .panel-header {
+  margin-bottom: 8px;
+}
+
 .gap-row {
   display: grid;
   grid-template-columns: 1fr 1.3fr 1.6fr;
@@ -54,16 +70,16 @@
   min-width: 190px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 6px 10px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-soft);
   background: var(--color-surface-alt);
 }
 
 .funnel-step-icon {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--color-primary-soft);
   color: var(--color-primary);
@@ -125,8 +141,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 32px;
-  padding: 0 14px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 1px solid var(--color-border);
   font-size: 12.5px;

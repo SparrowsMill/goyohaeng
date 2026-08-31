@@ -1,3 +1,4 @@
+import { useId } from "react";
 import "./charts.css";
 
 interface Point {
@@ -23,43 +24,13 @@ function buildTicks(max: number, step: number) {
   return ticks;
 }
 
-// Picks an axis max with ~30% headroom above the tallest value, rounded to a
-// clean step so the gridlines/labels read as real axis values.
-function computeAxis(maxValue: number) {
-  const target = maxValue * 1.3;
+// Picks an axis max with the given headroom above the tallest value, rounded
+// to a clean step so the gridlines/labels read as real axis values.
+function computeAxis(maxValue: number, headroom = 1.3) {
+  const target = maxValue * headroom;
   const step = axisStep(target);
   const max = Math.max(step, Math.ceil(target / step) * step);
   return { max, step };
-}
-
-// Picks a line axis max that (a) fits the data with a little headroom and
-// (b) keeps every line point far enough above its column's bar-top label to
-// avoid the two value labels overlapping, given the bar axis chosen above.
-// LABEL_PX is the vertical room a value label + its gap needs, in pixels;
-// expressing the clearance as a percentage of the actual plot height keeps
-// it correct at any `height` prop, not just the one it was tuned against.
-// Returns null when no axis max can fit the data AND keep every column
-// clear — the caller falls back to a collision-safe relative band instead.
-function computeComboLineAxis(
-  maxLine: number,
-  barAxisMax: number,
-  points: { bar: number; line: number }[],
-  height: number,
-) {
-  const step = axisStep(maxLine);
-  let max = Math.max(step, Math.ceil((maxLine * 1.02) / step) * step);
-
-  const LABEL_PX = 26;
-  const clearance = (LABEL_PX / height) * 100;
-  const ratios = points.filter((p) => p.bar > 0).map((p) => (p.line * 100) / ((p.bar * 100) / barAxisMax + clearance));
-  const safeMax = ratios.length ? Math.min(...ratios) : Infinity;
-
-  if (max <= safeMax) {
-    while (max + step <= safeMax) max += step;
-    return { max, step };
-  }
-  while (max - step >= maxLine && max - step >= safeMax) max -= step;
-  return max > safeMax ? null : { max, step };
 }
 
 export default function ComboChart({
@@ -70,6 +41,7 @@ export default function ComboChart({
   barLegend,
   lineLegend,
   detailed = false,
+  area = false,
 }: {
   data: Point[];
   barColor?: string;
@@ -78,58 +50,62 @@ export default function ComboChart({
   barLegend?: string;
   lineLegend?: string;
   detailed?: boolean;
+  area?: boolean;
 }) {
+  const gradientId = useId();
   const hasBar = data.some((d) => d.bar !== undefined);
   const hasLine = data.some((d) => d.line !== undefined);
-  // When both a bar and a line are present, the line is confined to a band near
-  // the top of the plot (and bars get extra headroom below it) so the bar's
-  // value label and the line's value label never land on top of each other.
   const isCombo = hasBar && hasLine;
 
   const maxBar = Math.max(0, ...data.map((d) => d.bar ?? 0));
   const maxLine = Math.max(0, ...data.map((d) => d.line ?? 0));
 
-  // Left axis carries the bar's scale when there's a bar; for a line-only
-  // chart it carries the line's own scale instead, so a single metric still
-  // gets a real axis. Right axis only exists for a true bar+line combo.
-  const leftAxis = !detailed ? null : hasBar ? computeAxis(maxBar) : hasLine ? computeAxis(maxLine) : null;
-  const rightAxis =
-    detailed && isCombo
-      ? computeComboLineAxis(
-          maxLine,
-          leftAxis!.max,
-          data.map((d) => ({ bar: d.bar ?? 0, line: d.line ?? 0 })),
-          height,
-        )
-      : null;
+  // Bar and line each get their own true, independent axis — same as any
+  // normal dual-axis combo chart; the bar axis keeps its normal headroom
+  // (bar height is never adjusted for label clearance). The line axis gets
+  // more headroom in combo mode: with more room on its own scale, the
+  // flip-to-whichever-side-fits-better label placement below can always
+  // find a clear spot, which a snugger axis doesn't leave room for.
+  const leftAxis = detailed && hasBar ? computeAxis(maxBar) : detailed && hasLine ? computeAxis(maxLine) : null;
+  const rightAxis = detailed && isCombo ? computeAxis(maxLine, 2) : null;
   const lineAxis = isCombo ? rightAxis : hasLine && !hasBar ? leftAxis : null;
 
   const barMax = hasBar ? (leftAxis ? leftAxis.max : Math.max(1, maxBar) * (isCombo ? 2.3 : 1.25)) : 1;
   const lineMax = lineAxis ? lineAxis.max : Math.max(1, maxLine) * 1.4;
 
-  const lineValues = data.map((d) => d.line ?? 0);
-  const lineMin = Math.min(...lineValues);
-  const lineSpread = Math.max(1, Math.max(...lineValues) - lineMin);
-
-  // Fallback band for when a true-scale line axis isn't safe (or isn't
-  // computed at all): keep the band's bottom edge comfortably above the
-  // tallest bar's own top, whatever headroom that bar happens to have.
-  const barTopPct = hasBar ? 100 - (maxBar / barMax) * 100 : 100;
-  const LINE_BAND_BOTTOM = Math.max(6, Math.min(30, barTopPct - 8));
-  const LINE_BAND_TOP = Math.max(2, LINE_BAND_BOTTOM - 16);
+  // Label geometry, in px: the value text is ~16px tall; the dot-wrap block
+  // (text, 6px gap, 6px dot) is 28px tall and centered on its anchor point.
+  // The bar's own value label sits 6-22px above its rect top. Converting to
+  // % of the actual plot height lets this stay correct at any `height` prop.
+  const pxToPct = (px: number) => (px / height) * 100;
+  // The 28px dot-wrap block ([text, gap, dot] or reversed) is centered on
+  // its anchor, spanning [anchor-14, anchor+14] either way; only where the
+  // 16px text sits within that block changes.
+  const labelSpan = (anchorPct: number, flipped: boolean): [number, number] =>
+    flipped
+      ? [anchorPct - pxToPct(2), anchorPct + pxToPct(14)]
+      : [anchorPct - pxToPct(14), anchorPct + pxToPct(2)];
+  // Signed clearance between two spans: positive = how big the gap between
+  // them is, negative = how much they overlap.
+  const clearance = (a: [number, number], b: [number, number]) => Math.max(a[0] - b[1], b[0] - a[1]);
 
   const step = 100 / data.length;
-  const points = data.map((d, i) => ({
-    xPct: step * i + step / 2,
-    yPct: !hasLine
-      ? 0
-      : lineAxis
-        ? 100 - ((d.line ?? 0) / lineAxis.max) * 100
-        : isCombo
-          ? LINE_BAND_BOTTOM - ((d.line ?? 0) - lineMin) / lineSpread * (LINE_BAND_BOTTOM - LINE_BAND_TOP)
-          : 100 - ((d.line ?? 0) / lineMax) * 100,
-    value: d.line,
-  }));
+  const points = data.map((d, i) => {
+    const yPct = !hasLine ? 0 : 100 - ((d.line ?? 0) / lineMax) * 100;
+    // When this column also has a bar, place the line's value label on
+    // whichever side of its dot (above or below) leaves the most clearance
+    // from that bar's own value label — the dot itself always stays on its
+    // true, independent scale; only the label can move to stay legible.
+    let flip = false;
+    if (hasBar && d.bar !== undefined) {
+      const barTopPct = 100 - (d.bar / barMax) * 100;
+      const barLabelSpan: [number, number] = [barTopPct - pxToPct(22), barTopPct - pxToPct(6)];
+      const aboveClearance = clearance(labelSpan(yPct, false), barLabelSpan);
+      const belowClearance = clearance(labelSpan(yPct, true), barLabelSpan);
+      flip = belowClearance > aboveClearance;
+    }
+    return { xPct: step * i + step / 2, yPct, value: d.line, flip };
+  });
 
   const leftTicks = leftAxis ? buildTicks(leftAxis.max, leftAxis.step) : [];
   const rightTicks = rightAxis ? buildTicks(rightAxis.max, rightAxis.step) : [];
@@ -160,6 +136,20 @@ export default function ComboChart({
 
       {hasLine && (
         <svg className="chart-line-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {area && (
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={lineColor} stopOpacity="0.32" />
+                <stop offset="100%" stopColor={lineColor} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          )}
+          {area && (
+            <polygon
+              points={`${points[0].xPct},100 ${points.map((p) => `${p.xPct},${p.yPct}`).join(" ")} ${points[points.length - 1].xPct},100`}
+              fill={`url(#${gradientId})`}
+            />
+          )}
           <polyline
             points={points.map((p) => `${p.xPct},${p.yPct}`).join(" ")}
             fill="none"
@@ -172,7 +162,11 @@ export default function ComboChart({
 
       {hasLine &&
         points.map((p, i) => (
-          <div key={i} className="chart-line-dot-wrap" style={{ left: `${p.xPct}%`, top: `${p.yPct}%` }}>
+          <div
+            key={i}
+            className={`chart-line-dot-wrap ${p.flip ? "chart-line-dot-wrap-flip" : ""}`}
+            style={{ left: `${p.xPct}%`, top: `${p.yPct}%` }}
+          >
             <span className="chart-line-value">{p.value}</span>
             <span className="chart-line-dot" style={{ background: lineColor }} />
           </div>

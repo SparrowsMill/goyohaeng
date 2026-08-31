@@ -65,7 +65,7 @@ export default function StatsDashboardPage() {
   const [period, setPeriod] = useState<"7d" | "1m" | "3m">("7d");
 
   return (
-    <>
+    <div className="stats-page">
       <PageHeader title="통계 데이터 보드" subtitle="전주 한옥마을 운영 데이터를 한눈에 확인하세요." showVisitToggle />
 
       <div className="gap-row">
@@ -88,7 +88,7 @@ export default function StatsDashboardPage() {
             산출 근거
           </p>
           <p className="gap-basis-desc">
-            GAP Score는 검색 관심도와 실제 방문 데이터를 종합해 산출하였어요. 두 지표의 균형이 원활하며 집수가 높아지면, 해당 상소이 실현여면 의미합니다.
+            검색 관심도와 실제 방문 데이터를 종합해 산출해요. 두 지표가 고르게 높을수록 방문 가치가 크다는 뜻이에요.
           </p>
           <div className="gap-metric">
             <div className="gap-metric-label">
@@ -152,27 +152,30 @@ export default function StatsDashboardPage() {
               ))}
             </div>
           </div>
-          <ComboChart data={gapTrend.map((d) => ({ label: d.label, line: d.value }))} detailed height={150} />
+          <ComboChart data={gapTrend.map((d) => ({ label: d.label, line: d.value }))} detailed area height={70} />
         </section>
       </div>
 
-      <div className="grid grid-3" style={{ margin: "20px 0" }}>
+      <div className="grid grid-3" style={{ margin: "10px 0" }}>
         <StatCard
-          icon={<CalendarCheck size={19} />}
+          compact
+          icon={<CalendarCheck size={17} />}
           tone="primary"
           label="전체 방문 인증 횟수"
           hint="최근 7일간 누적된 방문 인증 완료 건수예요."
           value="1,246 건"
         />
         <StatCard
-          icon={<RotateCcw size={19} />}
+          compact
+          icon={<RotateCcw size={17} />}
           tone="primary"
           label="재방문 수"
           hint="같은 방문자가 다시 방문 인증한 건수예요."
           value="312 건"
         />
         <StatCard
-          icon={<AlertTriangle size={19} />}
+          compact
+          icon={<AlertTriangle size={17} />}
           tone="warning"
           label="인증 실패/만료 수"
           hint="인증에 실패했거나 시간이 만료된 건수예요."
@@ -181,7 +184,7 @@ export default function StatsDashboardPage() {
         />
       </div>
 
-      <div className="grid grid-3" style={{ marginBottom: 20 }}>
+      <div className="grid grid-3" style={{ marginBottom: 10 }}>
         <section className="panel">
           <div className="panel-header">
             <p className="panel-title">방문 인증 추이</p>
@@ -189,7 +192,14 @@ export default function StatsDashboardPage() {
               전체 보기 <ChevronRight size={13} />
             </button>
           </div>
-          <ComboChart data={visitTrend} detailed height={140} lineColor="var(--color-danger)" />
+          <ComboChart
+            data={visitTrend}
+            detailed
+            height={140}
+            lineColor="var(--color-danger)"
+            barLegend="방문 인증 완료 수"
+            lineLegend="인증 실패/만료 수"
+          />
         </section>
         <section className="panel">
           <div className="panel-header">
@@ -208,7 +218,7 @@ export default function StatsDashboardPage() {
         </section>
       </div>
 
-      <section className="panel" style={{ marginBottom: 20 }}>
+      <section className="panel" style={{ marginBottom: 10 }}>
         <div className="panel-header">
           <div>
             <p className="panel-title">방문 인증 현황</p>
@@ -273,6 +283,6 @@ export default function StatsDashboardPage() {
           ))}
         </div>
       </section>
-    </>
+    </div>
   );
 }

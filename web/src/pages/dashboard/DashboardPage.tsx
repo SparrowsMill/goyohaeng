@@ -242,8 +242,9 @@ export default function DashboardPage() {
             </div>
           </div>
           <ComboChart
-            data={gapTrend.map((d) => ({ label: d.label, bar: d.value }))}
+            data={gapTrend.map((d) => ({ label: d.label, line: d.value }))}
             detailed
+            area
             height={197}
           />
         </section>

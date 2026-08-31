@@ -1,20 +1,25 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { IdCard, CalendarClock, Timer, ShieldCheck, Gift, Info } from "lucide-react";
+import { IdCard, CalendarClock, Timer, ShieldCheck, Gift, Info, CheckCircle2 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
-import Table from "../../components/ui/Table";
+import Modal from "../../components/ui/Modal";
+import { useToast } from "../../components/ui/Toast";
 import "./VisitAuthConfirmPage.css";
-
-const history = [
-  { code: "482914", nickname: "minji_jeonju", status: "인증 완료", tone: "success" as const, created: "2025-05-20 13:35:18", processed: "2025-05-20 13:40:55", by: "고요행 관리자" },
-  { code: "482913", nickname: "travel_lover", status: "방문 예정", tone: "primary" as const, created: "2025-05-20 13:28:47", processed: "-", by: "-" },
-  { code: "482912", nickname: "happy_day", status: "시간 만료", tone: "danger" as const, created: "2025-05-20 12:18:32", processed: "2025-05-20 12:48:32", by: "자동 만료" },
-];
 
 export default function VisitAuthConfirmPage() {
   const { id } = useParams();
   const code = id ?? "482915";
+  const { showToast } = useToast();
+  const [completed, setCompleted] = useState(false);
+  const [resultOpen, setResultOpen] = useState(false);
+
+  const handleConfirm = () => {
+    setCompleted(true);
+    setResultOpen(true);
+    showToast("방문 인증이 완료되었습니다.", "success");
+  };
 
   return (
     <>
@@ -36,7 +41,7 @@ export default function VisitAuthConfirmPage() {
           </span>
           <div>
             <p className="strip-label">현재 상태</p>
-            <Badge tone="primary">방문 예정</Badge>
+            <Badge tone={completed ? "success" : "primary"}>{completed ? "인증 완료" : "방문 예정"}</Badge>
           </div>
         </div>
         <div>
@@ -133,32 +138,36 @@ export default function VisitAuthConfirmPage() {
           <ShieldCheck size={20} />
         </span>
         <div className="confirm-box-text">
-          <p className="confirm-box-title">방문 인증 하시겠습니까?</p>
+          <p className="confirm-box-title">
+            {completed ? "방문 인증이 완료되었습니다" : "방문 인증 하시겠습니까?"}
+          </p>
           <p className="confirm-box-desc">
-            인증을 완료하면 사용자의 방문 상태가 '인증 완료'로 변경되며, 해당 세션은 완료된 인증 목록으로 이동합니다.
+            {completed
+              ? "해당 세션은 완료된 인증 목록으로 이동했습니다."
+              : "인증을 완료하면 사용자의 방문 상태가 '인증 완료'로 변경되며, 해당 세션은 완료된 인증 목록으로 이동합니다."}
           </p>
         </div>
         <div className="confirm-box-actions">
-          <Button variant="secondary">취소</Button>
-          <Button>방문 인증 완료</Button>
+          <Button variant="secondary" disabled={completed}>
+            취소
+          </Button>
+          <Button onClick={handleConfirm} disabled={completed}>
+            {completed ? "처리 완료" : "방문 인증 완료"}
+          </Button>
         </div>
       </section>
 
-      <section className="panel" style={{ marginTop: 20 }}>
-        <p className="panel-title">최근 처리 이력</p>
-        <Table
-          rowKey={(h) => h.code}
-          data={history}
-          columns={[
-            { key: "code", header: "인증 번호", className: "mono", render: (h) => h.code },
-            { key: "nickname", header: "방문자 닉네임", render: (h) => h.nickname },
-            { key: "status", header: "상태", render: (h) => <Badge tone={h.tone}>{h.status}</Badge> },
-            { key: "created", header: "생성 시각", render: (h) => h.created },
-            { key: "processed", header: "처리 시각", render: (h) => h.processed },
-            { key: "by", header: "처리자", render: (h) => h.by },
-          ]}
-        />
-      </section>
+      <Modal
+        open={resultOpen}
+        onClose={() => setResultOpen(false)}
+        title="방문 인증이 완료되었습니다"
+        description={`인증 번호 ${code}의 방문 상태가 '인증 완료'로 변경되었습니다.`}
+        footer={<Button onClick={() => setResultOpen(false)}>확인</Button>}
+      >
+        <div className="confirm-result">
+          <CheckCircle2 size={40} className="confirm-result-icon" />
+        </div>
+      </Modal>
     </>
   );
 }

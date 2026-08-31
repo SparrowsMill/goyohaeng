@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const [showPw, setShowPw] = useState(false);
 
   return (
-    <>
+    <div className="settings-page">
       <PageHeader title="설정" subtitle="관리자 계정 정보와 보안 설정을 관리하세요." hideSettings />
 
       <div className="grid grid-2" style={{ gridTemplateColumns: "1.8fr 1fr", alignItems: "start" }}>
@@ -40,7 +40,7 @@ export default function SettingsPage() {
 
           <section className="panel">
             <p className="panel-title">비밀번호 변경</p>
-            <div className="settings-field-list" style={{ marginTop: 12 }}>
+            <div className="settings-field-list" style={{ marginTop: 4 }}>
               <div className="form-row">
                 <label>현재 비밀번호</label>
                 <div className="field-input-wrap">
@@ -69,7 +69,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
               <Button>비밀번호 변경</Button>
             </div>
           </section>
@@ -84,10 +84,10 @@ export default function SettingsPage() {
                 <div>
                   <p className="account-manage-title">로그아웃</p>
                   <p className="account-manage-desc">현재 계정에서 로그아웃합니다.</p>
+                  <Link to="/login" className="btn btn-secondary account-manage-btn">
+                    로그아웃
+                  </Link>
                 </div>
-                <Link to="/login" className="btn btn-secondary">
-                  로그아웃
-                </Link>
               </div>
               <div className="account-manage-item">
                 <span className="account-manage-icon danger">
@@ -96,8 +96,8 @@ export default function SettingsPage() {
                 <div>
                   <p className="account-manage-title">회원 탈퇴</p>
                   <p className="account-manage-desc">탈퇴 시 관리자 계정 정보가 삭제됩니다.</p>
+                  <button className="btn btn-danger account-manage-btn">회원 탈퇴</button>
                 </div>
-                <button className="btn btn-danger">회원 탈퇴</button>
               </div>
             </div>
           </section>
@@ -130,6 +130,6 @@ export default function SettingsPage() {
           </ul>
         </section>
       </div>
-    </>
+    </div>
   );
 }
