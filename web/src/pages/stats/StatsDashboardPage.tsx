@@ -10,6 +10,8 @@ import {
   CheckCircle2,
   ArrowRight,
   Hash,
+  Info,
+  Calendar,
 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
@@ -68,10 +70,17 @@ export default function StatsDashboardPage() {
 
       <div className="gap-row">
         <section className="panel gap-score-panel">
-          <p className="panel-title">현재 GAP Score</p>
+          <p className="panel-title">
+            현재 GAP Score{" "}
+            <span title="온라인 관심도와 실제 방문 집중도의 차이로 산출한 지표예요.">
+              <Info size={12} className="info-icon" />
+            </span>
+          </p>
           <p className="gap-score-value">72</p>
           <Badge tone="success">양호</Badge>
-          <p className="gap-score-caption">최근 7일 기준</p>
+          <p className="gap-score-caption">
+            <Calendar size={11} /> 최근 7일 기준
+          </p>
         </section>
 
         <section className="panel">
@@ -82,22 +91,51 @@ export default function StatsDashboardPage() {
             GAP Score는 검색 관심도와 실제 방문 데이터를 종합해 산출하였어요. 두 지표의 균형이 원활하며 집수가 높아지면, 해당 상소이 실현여면 의미합니다.
           </p>
           <div className="gap-metric">
-            <div className="gap-metric-label">검색 관심도 <span>68</span></div>
+            <div className="gap-metric-label">
+              <span className="gap-metric-label-text">
+                검색 관심도
+                <span title="최근 7일간 네이버 데이터랩 검색량 기준 지수예요.">
+                  <Info size={11} className="info-icon" />
+                </span>
+              </span>
+              <span>68</span>
+            </div>
             <div className="progress-track">
               <div className="progress-fill" style={{ width: "68%" }} />
             </div>
+            <div className="progress-range">
+              <span>0</span>
+              <span>100</span>
+            </div>
           </div>
           <div className="gap-metric">
-            <div className="gap-metric-label">실제 방문 집중도 <span>76</span></div>
+            <div className="gap-metric-label">
+              <span className="gap-metric-label-text">
+                실제 방문 집중도
+                <span title="최근 7일간 실제 방문 인증 집중률 기준 지수예요.">
+                  <Info size={11} className="info-icon" />
+                </span>
+              </span>
+              <span>76</span>
+            </div>
             <div className="progress-track">
               <div className="progress-fill" style={{ width: "76%" }} />
+            </div>
+            <div className="progress-range">
+              <span>0</span>
+              <span>100</span>
             </div>
           </div>
         </section>
 
         <section className="panel">
           <div className="panel-header">
-            <p className="panel-title">GAP Score 추세</p>
+            <p className="panel-title">
+              GAP Score 추세{" "}
+              <span title="선택한 기간 동안의 GAP Score 변화예요.">
+                <Info size={12} className="info-icon" />
+              </span>
+            </p>
             <div className="period-tabs">
               {[
                 { key: "7d", label: "최근 7일" },
@@ -114,14 +152,33 @@ export default function StatsDashboardPage() {
               ))}
             </div>
           </div>
-          <ComboChart data={gapTrend.map((d) => ({ label: d.label, line: d.value }))} height={150} />
+          <ComboChart data={gapTrend.map((d) => ({ label: d.label, line: d.value }))} detailed height={150} />
         </section>
       </div>
 
       <div className="grid grid-3" style={{ margin: "20px 0" }}>
-        <StatCard icon={<CalendarCheck size={19} />} tone="primary" label="전체 방문 인증 횟수" value="1,246 건" />
-        <StatCard icon={<RotateCcw size={19} />} tone="primary" label="재방문 수" value="312 건" />
-        <StatCard icon={<AlertTriangle size={19} />} tone="warning" label="인증 실패/만료 수" value="58 건" valueTone="warning" />
+        <StatCard
+          icon={<CalendarCheck size={19} />}
+          tone="primary"
+          label="전체 방문 인증 횟수"
+          hint="최근 7일간 누적된 방문 인증 완료 건수예요."
+          value="1,246 건"
+        />
+        <StatCard
+          icon={<RotateCcw size={19} />}
+          tone="primary"
+          label="재방문 수"
+          hint="같은 방문자가 다시 방문 인증한 건수예요."
+          value="312 건"
+        />
+        <StatCard
+          icon={<AlertTriangle size={19} />}
+          tone="warning"
+          label="인증 실패/만료 수"
+          hint="인증에 실패했거나 시간이 만료된 건수예요."
+          value="58 건"
+          valueTone="warning"
+        />
       </div>
 
       <div className="grid grid-3" style={{ marginBottom: 20 }}>
@@ -132,7 +189,7 @@ export default function StatsDashboardPage() {
               전체 보기 <ChevronRight size={13} />
             </button>
           </div>
-          <ComboChart data={visitTrend} height={140} lineColor="var(--color-danger)" />
+          <ComboChart data={visitTrend} detailed height={140} lineColor="var(--color-danger)" />
         </section>
         <section className="panel">
           <div className="panel-header">
@@ -141,13 +198,13 @@ export default function StatsDashboardPage() {
               전체 보기 <ChevronRight size={13} />
             </button>
           </div>
-          <ComboChart data={revisitTrend} height={140} />
+          <ComboChart data={revisitTrend} detailed height={140} />
         </section>
         <section className="panel">
           <div className="panel-header">
             <p className="panel-title">인증 실패/만료 추이</p>
           </div>
-          <ComboChart data={failTrend} height={140} barColor="var(--color-danger-soft)" />
+          <ComboChart data={failTrend} detailed height={140} barColor="var(--color-danger-soft)" />
         </section>
       </div>
 

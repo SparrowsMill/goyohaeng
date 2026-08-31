@@ -22,6 +22,12 @@
   gap: 6px;
 }
 
+.info-icon {
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+  cursor: help;
+}
+
 .panel-action {
   font-size: 12.5px;
   font-weight: 600;
@@ -88,7 +94,13 @@
   margin-bottom: 6px;
 }
 
-.gap-metric-label span {
+.gap-metric-label-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gap-metric-label > span:last-child {
   color: var(--color-text);
   font-weight: 700;
 }
@@ -104,6 +116,14 @@
   height: 100%;
   border-radius: 999px;
   background: var(--color-primary);
+}
+
+.progress-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--color-text-faint);
+  margin-top: 4px;
 }
 
 .period-tabs {

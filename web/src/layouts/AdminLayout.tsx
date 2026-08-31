@@ -36,6 +36,10 @@ export default function AdminLayout() {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   const isActive = (matchers: string[]) =>
     matchers.some((m) => (m === "/" ? pathname === "/" : pathname.startsWith(m)));
 
