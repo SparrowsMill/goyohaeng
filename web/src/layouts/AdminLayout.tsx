@@ -1,7 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Home, BarChart2, ShieldCheck, Building2, Settings, LogOut, Mountain, Menu, X } from "lucide-react";
+import {
+  Home,
+  BarChart2,
+  ShieldCheck,
+  Building2,
+  Settings,
+  LogOut,
+  Mountain,
+  Menu,
+  X,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 import "./AdminLayout.css";
+
+const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 
 const NAV_ITEMS = [
   { label: "대시보드", to: "/", icon: Home, match: ["/"] },
@@ -14,6 +28,13 @@ const NAV_ITEMS = [
 export default function AdminLayout() {
   const { pathname } = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1"
+  );
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
+  }, [collapsed]);
 
   const isActive = (matchers: string[]) =>
     matchers.some((m) => (m === "/" ? pathname === "/" : pathname.startsWith(m)));
@@ -37,12 +58,20 @@ export default function AdminLayout() {
 
       {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
+      <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""} ${collapsed ? "collapsed" : ""}`}>
         <div className="admin-sidebar-logo">
           <span className="admin-sidebar-logo-icon">
             <Mountain size={18} strokeWidth={2.2} />
           </span>
-          <span>고요행 관리자</span>
+          <span className="admin-nav-label">고요행 관리자</span>
+          <button
+            type="button"
+            className="admin-sidebar-collapse-btn"
+            aria-label={collapsed ? "메뉴 펼치기" : "메뉴 접기"}
+            onClick={() => setCollapsed((c) => !c)}
+          >
+            {collapsed ? <PanelLeftOpen size={16} strokeWidth={2} /> : <PanelLeftClose size={16} strokeWidth={2} />}
+          </button>
           <button
             type="button"
             className="admin-sidebar-close-btn"
@@ -59,10 +88,11 @@ export default function AdminLayout() {
               key={to}
               to={to}
               className={`admin-nav-item ${isActive(match) ? "active" : ""}`}
+              title={collapsed ? label : undefined}
               onClick={() => setSidebarOpen(false)}
             >
               <Icon size={17} strokeWidth={2} />
-              {label}
+              <span className="admin-nav-label">{label}</span>
             </Link>
           ))}
         </nav>
@@ -70,7 +100,7 @@ export default function AdminLayout() {
         <div className="admin-sidebar-illustration" aria-hidden="true" />
 
         <Link to="/login" className="admin-logout">
-          <LogOut size={16} /> 로그아웃
+          <LogOut size={16} /> <span className="admin-nav-label">로그아웃</span>
         </Link>
       </aside>
 

@@ -1,18 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  CalendarClock,
-  CheckCircle2,
-  AlertTriangle,
-  Star,
-  Pencil,
-  ChevronRight,
-  BarChart2,
-  ShieldCheck,
-  Settings,
-  Bell,
-  ExternalLink,
-} from "lucide-react";
+import { CalendarClock, CheckCircle2, AlertTriangle, Star, Pencil, ChevronRight, Bell, ExternalLink } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
 import Badge from "../../components/ui/Badge";
@@ -37,6 +25,13 @@ const upcoming = [
   { session: "SESSION-0520-0012", remaining: "5시간 20분", window: "18:00 ~ 20:00" },
 ];
 
+const notices = [
+  { text: "5월 전통차 체험 프로그램이 승인되었습니다.", time: "09:00" },
+  { text: "방문 인증 완료 알림이 5건 발생했습니다.", time: "08:45" },
+  { text: "GAP Score가 전일 대비 3점 상승했습니다.", time: "08:30" },
+  { text: "새 리뷰가 1건 등록되었습니다.", time: "07:52" },
+];
+
 const trend = [
   { label: "05/14 (수)", bar: 18, line: 8 },
   { label: "05/15 (목)", bar: 24, line: 10 },
@@ -47,14 +42,19 @@ const trend = [
   { label: "05/20 (화)", bar: 31, line: 12 },
 ];
 
-const notices = [
-  { text: "5월 전통차 체험 프로그램이 승인되었습니다.", time: "09:00" },
-  { text: "방문 인증 완료 알림이 5건 발생했습니다.", time: "08:45" },
-  { text: "GAP Score가 전일 대비 3점 상승했습니다.", time: "08:30" },
+const gapTrend = [
+  { label: "05/14 (수)", value: 58 },
+  { label: "05/15 (목)", value: 61 },
+  { label: "05/16 (금)", value: 64 },
+  { label: "05/17 (토)", value: 67 },
+  { label: "05/18 (일)", value: 69 },
+  { label: "05/19 (월)", value: 72 },
+  { label: "05/20 (화)", value: 72 },
 ];
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [period, setPeriod] = useState<"7d" | "1m" | "3m">("7d");
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 700);
@@ -68,25 +68,6 @@ export default function DashboardPage() {
         subtitle="내 장소의 오늘 운영 현황을 한눈에 확인하세요."
         showVisitToggle
       />
-
-      <div className="grid grid-4" style={{ marginBottom: 20 }}>
-        {isLoading ? (
-          Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={78} radius="var(--radius-md)" />)
-        ) : (
-          <>
-            <StatCard
-              icon={<CalendarClock size={19} />}
-              tone="primary"
-              label="방문 예정 현황"
-              hint="현재 방문 예정 상태이고 아직 만료되지 않은 인증 session 수"
-              value="12 건"
-            />
-            <StatCard icon={<CheckCircle2 size={19} />} tone="success" label="방문 인증 완료 수" value="31 건" />
-            <StatCard icon={<AlertTriangle size={19} />} tone="warning" label="인증 실패/만료 수" value="5 건" valueTone="warning" />
-            <StatCard icon={<Star size={19} />} tone="primary" label="현재 GAP Score" value="72" />
-          </>
-        )}
-      </div>
 
       <div className="dashboard-columns">
         <div className="stack">
@@ -141,16 +122,47 @@ export default function DashboardPage() {
               />
             )}
           </section>
-
-          <section className="panel">
-            <div className="panel-header">
-              <h2 className="panel-title">최근 7일 방문 인증 추이</h2>
-            </div>
-            <ComboChart data={trend} />
-          </section>
         </div>
 
         <div className="stack">
+          <div className="grid grid-2" style={{ gap: 12 }}>
+            {isLoading ? (
+              Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={78} radius="var(--radius-md)" />)
+            ) : (
+              <>
+                <StatCard
+                  compact
+                  icon={<CalendarClock size={14} />}
+                  tone="primary"
+                  label="방문 예정 현황"
+                  value="12 건"
+                />
+                <StatCard compact icon={<CheckCircle2 size={14} />} tone="success" label="방문 인증 완료 수" value="31 건" />
+                <StatCard compact icon={<AlertTriangle size={14} />} tone="warning" label="인증 실패/만료 수" value="5 건" valueTone="warning" />
+                <StatCard compact icon={<Star size={14} />} tone="primary" label="현재 GAP Score" value="72" />
+              </>
+            )}
+          </div>
+
+          <section className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">
+                <Bell size={15} /> 오늘 알림
+              </h2>
+            </div>
+            <ul className="notice-list">
+              {notices.map((n) => (
+                <li key={n.text}>
+                  <span>{n.text}</span>
+                  <time>{n.time}</time>
+                </li>
+              ))}
+            </ul>
+            <button className="place-summary-cta" style={{ background: "none", border: "none", width: "100%", cursor: "pointer" }}>
+              모든 알림 보기 <ChevronRight size={14} />
+            </button>
+          </section>
+
           <section className="panel">
             <div className="panel-header">
               <h2 className="panel-title">내 장소 정보 요약</h2>
@@ -190,50 +202,51 @@ export default function DashboardPage() {
                 </dd>
               </div>
             </dl>
-            <Link to="/places" className="place-summary-cta">
+            <Link to="/places" className="place-summary-cta" style={{ height: 36 }}>
               장소 관리로 이동 <ChevronRight size={14} />
             </Link>
           </section>
-
-          <section className="panel">
-            <div className="panel-header">
-              <h2 className="panel-title">빠른 작업</h2>
-            </div>
-            <div className="quick-actions">
-              <Link to="/stats" className="quick-action-btn">
-                <BarChart2 size={16} /> 통계 데이터 보드 보기
-              </Link>
-              <Link to="/visit-auth" className="quick-action-btn">
-                <ShieldCheck size={16} /> 방문 인증 관리
-              </Link>
-              <Link to="/places" className="quick-action-btn">
-                <Pencil size={16} /> 장소 정보 수정
-              </Link>
-              <Link to="/settings" className="quick-action-btn">
-                <Settings size={16} /> 설정 열기
-              </Link>
-            </div>
-          </section>
-
-          <section className="panel">
-            <div className="panel-header">
-              <h2 className="panel-title">
-                <Bell size={15} /> 오늘 알림
-              </h2>
-            </div>
-            <ul className="notice-list">
-              {notices.map((n) => (
-                <li key={n.text}>
-                  <span>{n.text}</span>
-                  <time>{n.time}</time>
-                </li>
-              ))}
-            </ul>
-            <button className="place-summary-cta" style={{ background: "none", border: "none", width: "100%", cursor: "pointer" }}>
-              모든 알림 보기 <ChevronRight size={14} />
-            </button>
-          </section>
         </div>
+      </div>
+
+      <div className="grid dashboard-charts-row" style={{ gap: 20, marginTop: 20 }}>
+        <section className="panel">
+          <div className="panel-header">
+            <h2 className="panel-title">최근 7일 방문 인증 추이</h2>
+          </div>
+          <ComboChart
+            data={trend}
+            detailed
+            barLegend="방문 인증 완료 수"
+            lineLegend="방문 예정 (현재 활성 세션)"
+          />
+        </section>
+
+        <section className="panel">
+          <div className="panel-header">
+            <h2 className="panel-title">GAP Score 추세</h2>
+            <div className="period-tabs">
+              {[
+                { key: "7d", label: "7일" },
+                { key: "1m", label: "1개월" },
+                { key: "3m", label: "3개월" },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  className={period === t.key ? "active" : ""}
+                  onClick={() => setPeriod(t.key as typeof period)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <ComboChart
+            data={gapTrend.map((d) => ({ label: d.label, bar: d.value }))}
+            detailed
+            height={197}
+          />
+        </section>
       </div>
     </>
   );
