@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, User, Gift, Clock, Camera, Trash2, ChevronRight } from "lucide-react";
+import { Camera, Trash2, Plus, X, Check } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import "./PlaceManagePage.css";
+
+const initialBenefits = [
+  "한복 체험 10% 할인",
+  "전통 차 시음 무료 제공",
+  "기념품 구매 시 5% 할인",
+  "문화 공연 우선 예약 혜택",
+];
 
 const hoursSummary = [
   ["월요일", "09:00 ~ 18:00"],
@@ -20,18 +27,30 @@ const hoursSummary = [
 
 export default function PlaceManagePage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [benefits, setBenefits] = useState(initialBenefits);
   const { showToast } = useToast();
 
-  return (
-    <>
-      <PageHeader title="장소 관리" subtitle="장소 정보를 관리하고 방문 혜택과 운영 정보를 설정합니다." />
+  const updateBenefit = (index: number, text: string) => {
+    setBenefits((prev) => prev.map((b, i) => (i === index ? text : b)));
+  };
 
-      <div className="grid grid-2" style={{ alignItems: "start" }}>
-        <section className="panel">
-          <p className="panel-title">
-            <FileText size={15} /> 1. 기본 정보
-          </p>
-          <div className="place-form-grid">
+  const removeBenefit = (index: number) => {
+    setBenefits((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addBenefit = () => {
+    setBenefits((prev) => [...prev, ""]);
+  };
+
+  return (
+    <div className="place-page">
+      <PageHeader title="장소 관리" hideSettings />
+
+      <section className="place-card">
+        <h2 className="place-card-title">기본 정보</h2>
+
+        <div className="place-basic-layout">
+          <div className="place-field-grid">
             <div className="form-row">
               <label className="required">장소 이름</label>
               <input className="text-input" defaultValue="전주 한옥마을" />
@@ -53,85 +72,90 @@ export default function PlaceManagePage() {
               <label>전화번호</label>
               <input className="text-input" defaultValue="063-123-4567" />
             </div>
-            <div className="form-row">
+            <div className="form-row" style={{ gridColumn: "1 / -1" }}>
               <label>공식 홈페이지</label>
               <input className="text-input" defaultValue="https://jeonju-hanok.kr" />
             </div>
-          </div>
-        </section>
-
-        <section className="panel">
-          <p className="panel-title">
-            <User size={15} /> 2. 소개
-          </p>
-          <div className="place-intro-grid">
-            <div className="form-row">
-              <label className="required">주인의 소개</label>
+            <div className="form-row" style={{ gridColumn: "1 / -1" }}>
+              <label className="required">소개</label>
               <textarea
                 className="textarea-input"
-                style={{ minHeight: 150 }}
+                style={{ minHeight: 108 }}
                 maxLength={500}
                 defaultValue="전주 한옥마을은 700여 채의 전통 한옥이 모여 있는 대한민국 대표 한옥 마을입니다. 전통과 현대가 어우러진 문화·관광 명소로, 전주의 맛과 멋, 정을 느낄 수 있는 특별한 여행지입니다."
               />
               <p className="hours-footnote">95 / 500자</p>
             </div>
-            <div className="form-row">
-              <label className="required">대표 사진</label>
-              <div className="place-photo" />
-              <div className="place-photo-actions">
-                <button className="btn btn-secondary" type="button">
-                  <Camera size={14} /> 사진 변경
-                </button>
-                <button className="btn btn-danger" type="button" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 size={14} /> 삭제
-                </button>
-              </div>
-            </div>
           </div>
-        </section>
 
-        <section className="panel">
-          <p className="panel-title">
-            <Gift size={15} /> 3. 방문 혜택
-          </p>
-          <textarea
-            className="textarea-input"
-            style={{ minHeight: 130, marginTop: 8 }}
-            maxLength={500}
-            defaultValue={"• 한복 체험 10% 할인\n• 전통 차 시음 무료 제공\n• 기념품 구매 시 5% 할인\n• 문화 공연 우선 예약 혜택"}
-          />
-          <p className="hours-footnote">83 / 500자</p>
-        </section>
-
-        <section className="panel">
-          <p className="panel-title">
-            <Clock size={15} /> 4. 운영 정보
-          </p>
-          <div className="place-hours-grid">
-            <div>
-              <p className="place-hours-caption">운영시간 요약</p>
-              <ul className="place-hours-list">
-                {hoursSummary.map(([day, hours]) => (
-                  <li key={day}>
-                    <span>{day}</span>
-                    <span>{hours}</span>
-                  </li>
-                ))}
-              </ul>
+          <div className="place-photo-panel">
+            <label className="required">대표 사진</label>
+            <div className="place-photo-hero">
+              <button type="button" className="place-photo-change-btn">
+                <Camera size={15} /> 사진 변경
+              </button>
             </div>
-            <div>
-              <p className="place-hours-caption">운영시간 관리</p>
-              <p className="funnel-desc" style={{ marginBottom: 12 }}>
-                운영시간의 상세 설정 및 예외 날짜, 특별 운영 시간 등은 운영시간 관리 페이지에서 수정합니다.
-              </p>
-              <Link to="/visit-auth/hours" className="place-hours-btn">
-                운영시간 수정 <ChevronRight size={14} />
-              </Link>
-              <p className="hours-footnote">운영시간 관리 페이지로 이동합니다.</p>
-            </div>
+            <button type="button" className="place-photo-remove" onClick={() => setDeleteOpen(true)}>
+              <Trash2 size={13} /> 사진 삭제
+            </button>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      <section className="place-card">
+        <div className="place-card-header">
+          <h2 className="place-card-title">운영 세부사항</h2>
+          <Link to="/places/hours" className="place-edit-hours-link">
+            운영시간 수정
+          </Link>
+        </div>
+
+        <div className="place-ops-layout">
+          <div className="place-benefit">
+            <p className="place-ops-caption">방문 혜택</p>
+            <ul className="place-benefit-list">
+              {benefits.map((b, i) => (
+                <li key={i}>
+                  <span className="place-benefit-icon">
+                    <Check size={13} />
+                  </span>
+                  <input
+                    className="place-benefit-input"
+                    value={b}
+                    placeholder="혜택 내용을 입력하세요"
+                    onChange={(e) => updateBenefit(i, e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="place-benefit-remove"
+                    aria-label="혜택 삭제"
+                    onClick={() => removeBenefit(i)}
+                  >
+                    <X size={13} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button type="button" className="place-benefit-add" onClick={addBenefit}>
+              <Plus size={13} /> 혜택 추가
+            </button>
+          </div>
+
+          <div className="place-ops-divider" />
+
+          <div className="place-hours">
+            <p className="place-ops-caption">운영시간</p>
+            <ul className="place-hours-list">
+              {hoursSummary.map(([day, hours]) => (
+                <li key={day}>
+                  <span>{day}</span>
+                  <span>{hours}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
       <div className="place-footer">
         <p>* 표시는 필수 입력 항목입니다.</p>
@@ -165,6 +189,6 @@ export default function PlaceManagePage() {
           </>
         }
       />
-    </>
+    </div>
   );
 }

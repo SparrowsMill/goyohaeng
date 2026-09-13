@@ -1,5 +1,5 @@
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .page-breadcrumbs {
@@ -45,7 +45,7 @@
 }
 
 .page-subtitle {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 13.5px;
   color: var(--color-text-soft);
 }

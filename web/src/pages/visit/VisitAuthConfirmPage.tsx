@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IdCard, CalendarClock, Timer, ShieldCheck, Gift, Info, CheckCircle2 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
@@ -8,12 +8,29 @@ import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import "./VisitAuthConfirmPage.css";
 
+const INITIAL_REMAINING_SECONDS = 72; // 01:12
+
+function formatCountdown(totalSeconds: number) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export default function VisitAuthConfirmPage() {
   const { id } = useParams();
   const code = id ?? "482915";
   const { showToast } = useToast();
   const [completed, setCompleted] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(INITIAL_REMAINING_SECONDS);
+
+  useEffect(() => {
+    if (completed || remainingSeconds <= 0) return;
+    const timer = setTimeout(() => setRemainingSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [remainingSeconds, completed]);
+
+  const expired = remainingSeconds <= 0 && !completed;
 
   const handleConfirm = () => {
     setCompleted(true);
@@ -23,7 +40,7 @@ export default function VisitAuthConfirmPage() {
 
   return (
     <>
-      <PageHeader title="방문 인증 상세" subtitle="도착한 고객의 인증 번호와 혜택 정보를 확인하고 방문 인증을 완료하세요." />
+      <PageHeader title="방문 인증 상세" />
 
       <section className="panel visit-detail-strip">
         <div>
@@ -41,7 +58,9 @@ export default function VisitAuthConfirmPage() {
           </span>
           <div>
             <p className="strip-label">현재 상태</p>
-            <Badge tone={completed ? "success" : "primary"}>{completed ? "인증 완료" : "방문 예정"}</Badge>
+            <Badge tone={completed ? "success" : expired ? "danger" : "primary"}>
+              {completed ? "인증 완료" : expired ? "시간 만료" : "방문 예정"}
+            </Badge>
           </div>
         </div>
         <div>
@@ -59,7 +78,9 @@ export default function VisitAuthConfirmPage() {
           </span>
           <div>
             <p className="strip-label">남은 시간</p>
-            <p className="strip-value text-warning">01:12</p>
+            <p className={`strip-value ${expired ? "text-danger" : "text-warning"}`}>
+              {expired ? "만료됨" : formatCountdown(remainingSeconds)}
+            </p>
           </div>
         </div>
       </section>
@@ -139,20 +160,26 @@ export default function VisitAuthConfirmPage() {
         </span>
         <div className="confirm-box-text">
           <p className="confirm-box-title">
-            {completed ? "방문 인증이 완료되었습니다" : "방문 인증 하시겠습니까?"}
+            {completed
+              ? "방문 인증이 완료되었습니다"
+              : expired
+                ? "인증 가능 시간이 만료되었습니다"
+                : "방문 인증 하시겠습니까?"}
           </p>
           <p className="confirm-box-desc">
             {completed
               ? "해당 세션은 완료된 인증 목록으로 이동했습니다."
-              : "인증을 완료하면 사용자의 방문 상태가 '인증 완료'로 변경되며, 해당 세션은 완료된 인증 목록으로 이동합니다."}
+              : expired
+                ? "인증번호 유효시간이 지나 더 이상 인증할 수 없어요. 고객에게 다시 방문 인증을 요청해주세요."
+                : "인증을 완료하면 사용자의 방문 상태가 '인증 완료'로 변경되며, 해당 세션은 완료된 인증 목록으로 이동합니다."}
           </p>
         </div>
         <div className="confirm-box-actions">
-          <Button variant="secondary" disabled={completed}>
+          <Button variant="secondary" disabled={completed || expired}>
             취소
           </Button>
-          <Button onClick={handleConfirm} disabled={completed}>
-            {completed ? "처리 완료" : "방문 인증 완료"}
+          <Button onClick={handleConfirm} disabled={completed || expired}>
+            {completed ? "처리 완료" : expired ? "만료됨" : "방문 인증 완료"}
           </Button>
         </div>
       </section>

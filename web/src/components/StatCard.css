@@ -1,68 +1,70 @@
 .stat-card {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  flex-direction: column;
   background: var(--color-surface);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 18px;
+  padding: 16px 18px;
 }
 
 .stat-card.compact {
-  gap: 8px;
-  padding: 12px;
+  padding: 12px 14px;
+}
+
+.stat-card-primary {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary-soft);
+}
+
+.stat-card-success,
+.stat-card-warning,
+.stat-card-danger {
+  border-top-width: 2px;
+}
+
+.stat-card-success {
+  border-top-color: var(--color-success);
+}
+
+.stat-card-warning {
+  border-top-color: var(--color-warning);
+}
+
+.stat-card-danger {
+  border-top-color: var(--color-danger);
 }
 
 .stat-card-icon {
-  width: 42px;
-  height: 42px;
+  display: inline-flex;
   flex-shrink: 0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-card.compact .stat-card-icon {
-  width: 26px;
-  height: 26px;
 }
 
 .tone-neutral {
-  background: var(--color-surface-alt);
-  color: var(--color-text-soft);
+  color: var(--color-text-faint);
 }
 
 .tone-primary {
-  background: var(--color-primary-soft);
   color: var(--color-primary);
 }
 
 .tone-success {
-  background: var(--color-success-soft);
   color: var(--color-success);
 }
 
 .tone-warning {
-  background: var(--color-warning-soft);
   color: var(--color-warning);
 }
 
 .tone-danger {
-  background: var(--color-danger-soft);
   color: var(--color-danger);
-}
-
-.stat-card-body {
-  min-width: 0;
 }
 
 .stat-card-label {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-soft);
 }
@@ -72,14 +74,33 @@
 }
 
 .stat-card-value {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 26px;
   font-weight: 700;
+  color: var(--color-text);
 }
 
 .stat-card.compact .stat-card-value {
-  margin-top: 4px;
-  font-size: 21px;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.stat-card-delta {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-faint);
+}
+
+.stat-card-delta.up {
+  color: var(--color-success);
+}
+
+.stat-card-delta.down {
+  color: var(--color-danger);
 }
 
 .text-success {

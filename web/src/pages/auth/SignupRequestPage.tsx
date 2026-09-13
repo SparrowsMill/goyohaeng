@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Info, ShieldCheck } from "lucide-react";
+import { Info, ShieldCheck, Calendar, Eye, EyeOff } from "lucide-react";
 import AuthHeader from "../../components/ui/AuthHeader";
 import Field from "../../components/ui/Field";
 import Button from "../../components/ui/Button";
@@ -35,13 +35,44 @@ const initialForm: FormState = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length < 4) return digits;
+  if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function formatBizNo(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length < 4) return digits;
+  if (digits.length < 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+}
+
 export default function SignupRequestPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+  const clearError = (key: keyof FormState) => {
+    setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+  };
 
   const update = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    clearError(key);
+  };
+
+  const updatePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, phone: formatPhone(e.target.value) }));
+    clearError("phone");
+  };
+
+  const updateBizNo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, businessNumber: formatBizNo(e.target.value) }));
+    clearError("businessNumber");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -74,6 +105,7 @@ export default function SignupRequestPage() {
         title="관리자 승인 요청"
         subtitle="관리자 계정 승인을 요청하시면 운영진의 검토 후 승인됩니다."
       />
+      <div className="auth-divider" />
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="auth-section">
@@ -88,12 +120,14 @@ export default function SignupRequestPage() {
               value={form.birthDate}
               onChange={update("birthDate")}
               error={errors.birthDate}
+              suffix={<Calendar size={16} />}
             />
             <Field
               label="전화번호"
               placeholder="010-1234-5678"
+              inputMode="numeric"
               value={form.phone}
-              onChange={update("phone")}
+              onChange={updatePhone}
               error={errors.phone}
             />
             <Field
@@ -121,8 +155,9 @@ export default function SignupRequestPage() {
             <Field
               label="사업자등록번호"
               placeholder="000-00-00000"
+              inputMode="numeric"
               value={form.businessNumber}
-              onChange={update("businessNumber")}
+              onChange={updateBizNo}
               error={errors.businessNumber}
             />
             <Field
@@ -154,19 +189,39 @@ export default function SignupRequestPage() {
             </div>
             <Field
               label="비밀번호"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="비밀번호를 입력하세요"
               value={form.password}
               onChange={update("password")}
               error={errors.password}
+              suffix={
+                <button
+                  type="button"
+                  className="field-icon-btn"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label="비밀번호 표시 전환"
+                >
+                  {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              }
             />
             <Field
               label="비밀번호 확인"
-              type="password"
+              type={showPasswordConfirm ? "text" : "password"}
               placeholder="비밀번호를 다시 입력하세요"
               value={form.passwordConfirm}
               onChange={update("passwordConfirm")}
               error={errors.passwordConfirm}
+              suffix={
+                <button
+                  type="button"
+                  className="field-icon-btn"
+                  onClick={() => setShowPasswordConfirm((v) => !v)}
+                  aria-label="비밀번호 확인 표시 전환"
+                >
+                  {showPasswordConfirm ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              }
             />
           </div>
         </div>

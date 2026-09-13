@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
-  Home,
   BarChart2,
   ShieldCheck,
   Building2,
@@ -18,9 +17,8 @@ import "./AdminLayout.css";
 const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 
 const NAV_ITEMS = [
-  { label: "대시보드", to: "/", icon: Home, match: ["/"] },
-  { label: "통계 데이터 보드", to: "/stats", icon: BarChart2, match: ["/stats", "/monitoring"] },
   { label: "방문 인증", to: "/visit-auth", icon: ShieldCheck, match: ["/visit-auth"] },
+  { label: "통계 데이터 보드", to: "/stats", icon: BarChart2, match: ["/stats", "/monitoring"] },
   { label: "장소 관리", to: "/places", icon: Building2, match: ["/places"] },
   { label: "설정", to: "/settings", icon: Settings, match: ["/settings"] },
 ];
@@ -40,8 +38,7 @@ export default function AdminLayout() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const isActive = (matchers: string[]) =>
-    matchers.some((m) => (m === "/" ? pathname === "/" : pathname.startsWith(m)));
+  const isActive = (matchers: string[]) => matchers.some((m) => pathname.startsWith(m));
 
   return (
     <div className="admin-shell">
@@ -95,7 +92,7 @@ export default function AdminLayout() {
               title={collapsed ? label : undefined}
               onClick={() => setSidebarOpen(false)}
             >
-              <Icon size={17} strokeWidth={2} />
+              <Icon size={19} strokeWidth={2} />
               <span className="admin-nav-label">{label}</span>
             </Link>
           ))}
@@ -104,7 +101,7 @@ export default function AdminLayout() {
         <div className="admin-sidebar-illustration" aria-hidden="true" />
 
         <Link to="/login" className="admin-logout">
-          <LogOut size={16} /> <span className="admin-nav-label">로그아웃</span>
+          <LogOut size={18} strokeWidth={2} /> <span className="admin-nav-label">로그아웃</span>
         </Link>
       </aside>
 

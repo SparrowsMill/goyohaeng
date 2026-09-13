@@ -1,5 +1,8 @@
-# design references 
+# design references
 design/
+
+# teammate's repo (separate git repo, cloned for reference)
+goyohaeng_app/
 
 # dependencies
 node_modules/

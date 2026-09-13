@@ -11,9 +11,10 @@ interface ModalProps {
   description?: ReactNode;
   children?: ReactNode;
   footer?: ReactNode;
+  maxWidth?: number;
 }
 
-export default function Modal({ open, onClose, title, description, children, footer }: ModalProps) {
+export default function Modal({ open, onClose, title, description, children, footer, maxWidth }: ModalProps) {
   useEffect(() => {
     if (!open) return;
 
@@ -28,7 +29,13 @@ export default function Modal({ open, onClose, title, description, children, foo
 
   return createPortal(
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        style={maxWidth ? { maxWidth } : undefined}
+      >
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
           <button type="button" className="modal-close" aria-label="닫기" onClick={onClose}>

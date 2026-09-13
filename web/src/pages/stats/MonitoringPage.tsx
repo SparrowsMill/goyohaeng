@@ -1,9 +1,6 @@
-import { useState } from "react";
-import { Sparkles, ExternalLink, MessageCircle, TrendingUp, Flag } from "lucide-react";
+import { Sparkles, ExternalLink, MessageCircle, TrendingUp } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import DonutChart from "../../components/charts/DonutChart";
-import Button from "../../components/ui/Button";
-import { useToast } from "../../components/ui/Toast";
 import "./MonitoringPage.css";
 
 const topKeywords = [
@@ -33,22 +30,16 @@ const channelSegments = [
   { label: "기타 SNS/웹", value: 2268, color: "#c9c2ab" },
 ];
 
-const reportTypes = ["우리 매장과 관련 없는 게시물", "링크 오류", "기타 (직접 작성)"];
-
 export default function MonitoringPage() {
-  const [reportType, setReportType] = useState(reportTypes[0]);
-  const { showToast } = useToast();
-
   return (
     <>
       <PageHeader
         title="키워드 모니터링"
-        subtitle="전주 한옥마을 관련 키워드와 언급 현황을 확인하세요."
         breadcrumbs={[{ label: "통계 데이터 보드", to: "/stats" }, { label: "키워드 모니터링" }]}
-        showVisitToggle
+        hideSettings
       />
 
-      <div className="grid grid-2" style={{ marginBottom: 20, gridTemplateColumns: "1.6fr 1fr" }}>
+      <div className="grid grid-2" style={{ marginBottom: 12, gridTemplateColumns: "1.6fr 1fr" }}>
         <section className="panel">
           <p className="panel-title">최근 많이 언급되는 키워드 TOP 8</p>
           <div className="keyword-top-grid">
@@ -127,32 +118,6 @@ export default function MonitoringPage() {
           </section>
         </div>
       </div>
-
-      <section className="panel" style={{ marginTop: 20 }}>
-        <p className="panel-title">정보 오류 신고</p>
-        <p className="funnel-desc" style={{ marginBottom: 16 }}>
-          아래의 노출된 게시물이나 링크가 실제로 우리 매장과 관련이 없거나 잘못된 정보라고 판단되면 신고해 주세요.
-          신고 접수 후 운영팀에서 검토하여 조치하겠습니다.
-        </p>
-        <div className="report-inline">
-          <Button
-            variant="primary"
-            icon={<Flag size={15} />}
-            onClick={() => showToast("신고가 접수되었습니다. 운영팀에서 검토 후 조치할게요.", "success")}
-          >
-            정보 오류 신고
-          </Button>
-          <div className="report-radio-group">
-            {reportTypes.map((t) => (
-              <label key={t} className="report-radio">
-                <input type="radio" checked={reportType === t} onChange={() => setReportType(t)} />
-                {t}
-              </label>
-            ))}
-          </div>
-          <textarea className="textarea-input" placeholder="기타 사유를 입력해주세요." maxLength={500} style={{ flex: 1, minHeight: 60 }} />
-        </div>
-      </section>
     </>
   );
 }

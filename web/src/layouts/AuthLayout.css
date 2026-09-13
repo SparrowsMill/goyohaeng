@@ -66,6 +66,10 @@
   padding: 40px 44px 32px;
 }
 
+.auth-card-wide {
+  max-width: 960px;
+}
+
 @media (max-width: 640px) {
   .auth-card {
     padding: 32px 22px 24px;

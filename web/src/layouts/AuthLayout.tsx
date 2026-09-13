@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Mountain } from "lucide-react";
 import "./AuthLayout.css";
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default function AuthLayout({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
     <div className="auth-layout">
       <div className="auth-layout-bg" aria-hidden="true" />
@@ -15,7 +15,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <small>GOYOHAENG ADMIN</small>
         </span>
       </div>
-      <div className="auth-card">{children}</div>
+      <div className={`auth-card ${wide ? "auth-card-wide" : ""}`}>{children}</div>
     </div>
   );
 }

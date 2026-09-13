@@ -35,13 +35,14 @@ function computeAxis(maxValue: number, headroom = 1.3) {
 
 export default function ComboChart({
   data,
-  barColor = "var(--color-primary-soft)",
+  barColor = "color-mix(in srgb, var(--color-primary) 38%, white)",
   lineColor = "var(--color-primary)",
   height = 180,
   barLegend,
   lineLegend,
   detailed = false,
   area = false,
+  labelStep = 1,
 }: {
   data: Point[];
   barColor?: string;
@@ -51,6 +52,7 @@ export default function ComboChart({
   lineLegend?: string;
   detailed?: boolean;
   area?: boolean;
+  labelStep?: number;
 }) {
   const gradientId = useId();
   const hasBar = data.some((d) => d.bar !== undefined);
@@ -205,8 +207,8 @@ export default function ComboChart({
         <div className="chart-plot-col">
           {plot}
           <div className="chart-labels">
-            {data.map((d) => (
-              <span key={d.label}>{d.label}</span>
+            {data.map((d, i) => (
+              <span key={d.label}>{i % labelStep === 0 || i === data.length - 1 ? d.label : ""}</span>
             ))}
           </div>
         </div>

@@ -2,23 +2,12 @@
   padding-bottom: 24px;
 }
 
-.stats-page .page-header {
-  margin-bottom: 16px;
-}
-
-.stats-page .panel {
-  padding: 14px 16px;
-}
-
-.stats-page .panel-header {
-  margin-bottom: 8px;
-}
-
 .gap-row {
   display: grid;
   grid-template-columns: 1fr 1.3fr 1.6fr;
   gap: 16px;
   align-items: stretch;
+  margin-bottom: 24px;
 }
 
 .gap-score-panel {
@@ -30,9 +19,19 @@
 
 .gap-score-value {
   font-size: 40px;
-  font-weight: 700;
-  color: var(--color-primary);
+  font-weight: 600;
+  color: var(--color-text);
   line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.gap-score-compare {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-success);
 }
 
 .gap-score-caption {
@@ -44,121 +43,172 @@
   margin-top: auto;
 }
 
+.gap-trend-stats {
+  display: flex;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.gap-trend-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.gap-trend-stat + .gap-trend-stat {
+  border-left: 1px solid var(--color-border-soft);
+}
+
+.gap-trend-stat-label {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin: 0 0 4px;
+}
+
+.gap-trend-stat-value {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.trend-panel-summary {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-soft);
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.trend-panel-summary .up {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.trend-panel-summary .down {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
 .funnel-desc {
   font-size: 12px;
   color: var(--color-text-faint);
   margin-top: 4px;
 }
 
-.funnel-row {
+.funnel-flow {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 8px;
 }
 
-.funnel-steps {
+.funnel-node {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
-.funnel-step {
-  flex: 1;
-  min-width: 190px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-soft);
-  background: var(--color-surface-alt);
-}
-
-.funnel-step-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
+.funnel-node-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-soft-text);
+  margin-bottom: 10px;
 }
 
-.funnel-step-label {
+.funnel-node-label {
   font-size: 12px;
   color: var(--color-text-soft);
+  font-weight: 500;
+}
+
+.funnel-node-value {
+  margin-top: 4px;
+  font-size: 19px;
   font-weight: 600;
+  color: var(--color-text);
 }
 
-.funnel-step-value {
-  margin-top: 3px;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.funnel-arrow {
+.funnel-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0 16px;
   color: var(--color-text-faint);
   flex-shrink: 0;
 }
 
-.funnel-rate {
-  text-align: center;
-  padding-left: 20px;
+.funnel-link span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+}
+
+.funnel-total {
+  flex-shrink: 0;
+  text-align: right;
+  padding-left: 24px;
+  margin-left: 16px;
   border-left: 1px solid var(--color-border-soft);
 }
 
-.funnel-rate p:first-child {
-  font-size: 12.5px;
+.funnel-total-label {
+  font-size: 12px;
   color: var(--color-text-soft);
-  font-weight: 600;
+  font-weight: 500;
 }
 
-.funnel-rate-value {
-  font-size: 26px;
-  font-weight: 700;
+.funnel-total-value {
+  font-size: 22px;
+  font-weight: 600;
   color: var(--color-primary);
   margin-top: 4px;
 }
 
-.funnel-rate-sub {
-  font-size: 11.5px;
-  color: var(--color-text-faint);
-  margin-top: 2px;
-}
-
-.keyword-pills {
+.keyword-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
-.keyword-pill {
+.keyword-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  font-size: 12.5px;
-  font-weight: 600;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-soft);
+  font-size: 12px;
+  font-weight: 500;
   text-decoration: none;
-  color: var(--color-text);
+  color: var(--color-text-soft);
 }
 
-.keyword-pill:hover {
+.keyword-chip:hover {
   background: var(--color-primary-soft);
   color: var(--color-primary-soft-text);
-  border-color: transparent;
 }
 
 @media (max-width: 1100px) {
   .gap-row {
     grid-template-columns: 1fr;
+  }
+  .funnel-flow {
+    flex-wrap: wrap;
+  }
+  .funnel-total {
+    margin-left: 0;
+    border-left: none;
+    padding-left: 0;
+    text-align: left;
+    width: 100%;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border-soft);
   }
 }

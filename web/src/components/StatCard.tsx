@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
-import { Info } from "lucide-react";
+import { Info, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import "./StatCard.css";
+
+interface Delta {
+  text: string;
+  direction?: "up" | "down" | "neutral";
+}
 
 export default function StatCard({
   icon,
@@ -9,6 +14,7 @@ export default function StatCard({
   hint,
   value,
   valueTone,
+  delta,
   sub,
   compact,
 }: {
@@ -18,24 +24,30 @@ export default function StatCard({
   hint?: string;
   value: ReactNode;
   valueTone?: "success" | "warning" | "danger";
+  delta?: Delta;
   sub?: ReactNode;
   compact?: boolean;
 }) {
   return (
-    <div className={`stat-card ${compact ? "compact" : ""}`}>
-      <span className={`stat-card-icon tone-${tone}`}>{icon}</span>
-      <div className="stat-card-body">
-        <p className="stat-card-label">
-          {label}
-          {hint && (
-            <span title={hint}>
-              <Info size={12} className="info-icon" />
-            </span>
-          )}
+    <div className={`stat-card stat-card-${tone} ${compact ? "compact" : ""}`}>
+      <p className="stat-card-label">
+        <span className={`stat-card-icon tone-${tone}`}>{icon}</span>
+        {label}
+        {hint && (
+          <span title={hint}>
+            <Info size={12} className="info-icon" />
+          </span>
+        )}
+      </p>
+      <p className={`stat-card-value ${valueTone ? `text-${valueTone}` : ""}`}>{value}</p>
+      {delta && (
+        <p className={`stat-card-delta ${delta.direction ?? "neutral"}`}>
+          {delta.direction === "up" && <ArrowUpRight size={13} />}
+          {delta.direction === "down" && <ArrowDownRight size={13} />}
+          {delta.text}
         </p>
-        <p className={`stat-card-value ${valueTone ? `text-${valueTone}` : ""}`}>{value}</p>
-        {sub}
-      </div>
+      )}
+      {sub}
     </div>
   );
 }

@@ -19,7 +19,6 @@ export default function ReportErrorPage() {
     <>
       <PageHeader
         title="정보 오류 신고"
-        subtitle="잘못된 게시물, 링크 오류, 또는 우리 매장과 관련 없는 콘텐츠를 신고하세요."
         breadcrumbs={[
           { label: "통계 데이터 보드", to: "/stats" },
           { label: "키워드 모니터링", to: "/monitoring" },

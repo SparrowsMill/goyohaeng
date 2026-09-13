@@ -1,10 +1,9 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupRequestPage from "./pages/auth/SignupRequestPage";
 import ApprovalStatusPage from "./pages/auth/ApprovalStatusPage";
-import DashboardPage from "./pages/dashboard/DashboardPage";
 import StatsDashboardPage from "./pages/stats/StatsDashboardPage";
 import MonitoringPage from "./pages/stats/MonitoringPage";
 import ReportErrorPage from "./pages/stats/ReportErrorPage";
@@ -17,7 +16,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <AuthLayout><LoginPage /></AuthLayout> },
-  { path: "/signup", element: <AuthLayout><SignupRequestPage /></AuthLayout> },
+  { path: "/signup", element: <AuthLayout wide><SignupRequestPage /></AuthLayout> },
   {
     path: "/approval-pending",
     element: (
@@ -46,14 +45,14 @@ export const router = createBrowserRouter([
     path: "/",
     element: <AdminLayout />,
     children: [
-      { index: true, element: <DashboardPage /> },
+      { index: true, element: <Navigate to="/visit-auth" replace /> },
       { path: "stats", element: <StatsDashboardPage /> },
       { path: "monitoring", element: <MonitoringPage /> },
       { path: "monitoring/report", element: <ReportErrorPage /> },
       { path: "visit-auth", element: <VisitAuthManagePage /> },
       { path: "visit-auth/:id", element: <VisitAuthConfirmPage /> },
-      { path: "visit-auth/hours", element: <OperatingHoursPage /> },
       { path: "places", element: <PlaceManagePage /> },
+      { path: "places/hours", element: <OperatingHoursPage /> },
       { path: "settings", element: <SettingsPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],

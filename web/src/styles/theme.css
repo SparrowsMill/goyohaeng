@@ -1,40 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&display=swap');
 
 :root {
-  --color-bg: #f3efe4;
-  --color-bg-soft: #ece5d4;
-  --color-surface: #fbf9f3;
-  --color-surface-alt: #f6f2e8;
-  --color-border: #e4dcc8;
-  --color-border-soft: #ece5d4;
+  /* ---- warm modern + Korean heritage: ivory bg, white surface, clearly stepped ---- */
+  --color-bg: #f4f1e8;
+  --color-bg-soft: #ece6d5;
+  --color-surface: #ffffff;
+  --color-surface-alt: #faf8f0;
+  --color-border: #d9d4c6;
+  --color-border-soft: #e7e2d2;
 
-  --color-text: #2d2a20;
-  --color-text-soft: #6f6b5c;
-  --color-text-faint: #9b9686;
+  --color-text: #252525;
+  --color-text-soft: #77746c;
+  --color-text-faint: #9c978a;
 
-  --color-primary: #5b6b34;
-  --color-primary-dark: #45521f;
-  --color-primary-soft: #e7ecd7;
-  --color-primary-soft-text: #4c5a2b;
+  /* ---- primary: olive — reserved for key interaction/selection/data, not decoration ---- */
+  --color-primary: #596644;
+  --color-primary-dark: #3f4933;
+  --color-primary-soft: #e6e9df;
+  --color-primary-soft-text: #3f4933;
+  --color-primary-glow: rgba(89, 102, 68, 0.18);
 
-  --color-success: #4c7a4c;
-  --color-success-soft: #e2ecdd;
+  --color-success: #697957;
+  --color-success-soft: #e4e8da;
 
-  --color-warning: #b5852f;
-  --color-warning-soft: #f6ecd6;
+  --color-warning: #b2874f;
+  --color-warning-soft: #f2e4ce;
 
-  --color-danger: #b6472c;
-  --color-danger-soft: #f8e0d6;
+  --color-danger: #b76a5f;
+  --color-danger-soft: #f3ded9;
 
-  --color-info: #6b6b9a;
-  --color-info-soft: #e8e6f2;
+  --color-info: #6e7c8a;
+  --color-info-soft: #e4e8ec;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
 
-  --shadow-card: 0 2px 10px rgba(60, 50, 20, 0.06);
-  --shadow-pop: 0 12px 32px rgba(50, 42, 15, 0.14);
+  --shadow-card: 0 1px 2px rgba(37, 33, 20, 0.04), 0 2px 8px rgba(37, 33, 20, 0.05);
+  --shadow-pop: 0 12px 32px rgba(37, 33, 20, 0.16);
 
   --font-sans: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
   --font-serif: 'Noto Serif KR', serif;
