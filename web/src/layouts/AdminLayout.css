@@ -120,20 +120,26 @@
 .admin-sidebar-illustration {
   flex: 1;
   margin: 20px -16px 0;
-  background: url("/images/dashboard_bg.png") left bottom / cover no-repeat;
+  background: url("/assets/start_bg.png") 85% bottom / 600px auto no-repeat;
 }
 
 .admin-logout {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   margin-top: 14px;
   padding: 10px 12px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--color-border-soft);
   color: var(--color-text-faint);
+  font-family: inherit;
   font-size: 13px;
   font-weight: 500;
+  text-align: left;
   text-decoration: none;
-  border-top: 1px solid var(--color-border-soft);
+  cursor: pointer;
 }
 
 .admin-logout:hover {

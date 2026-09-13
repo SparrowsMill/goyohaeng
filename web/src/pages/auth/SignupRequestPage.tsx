@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Info, ShieldCheck, Calendar, Eye, EyeOff } from "lucide-react";
+import { Info, ShieldCheck, Calendar, Eye, EyeOff, User, Phone, Mail, Building2, Hash, MapPin, Lock } from "lucide-react";
 import AuthHeader from "../../components/ui/AuthHeader";
 import Field from "../../components/ui/Field";
 import Button from "../../components/ui/Button";
 import InfoBox from "../../components/ui/InfoBox";
+import { useToast } from "../../components/ui/Toast";
+import { checkUsername, signup } from "../../api/auth";
+import { ApiError } from "../../api/client";
 import "./AuthForm.css";
 
 interface FormState {
@@ -34,6 +37,11 @@ const initialForm: FormState = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const BIRTH_DATE_PATTERN = /^\d{4}[.-]\d{2}[.-]\d{2}$/;
+
+function toIsoDate(value: string) {
+  return value.replace(/\./g, "-");
+}
 
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -51,13 +59,35 @@ function formatBizNo(value: string) {
 
 export default function SignupRequestPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const clearError = (key: keyof FormState) => {
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+  };
+
+  const handleCheckUsername = async () => {
+    if (!form.username.trim()) {
+      setErrors((prev) => ({ ...prev, username: "아이디를 입력해주세요." }));
+      return;
+    }
+    setCheckingUsername(true);
+    try {
+      const res = await checkUsername(form.username.trim());
+      showToast(
+        res.available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.",
+        res.available ? "success" : "error"
+      );
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : "중복 확인에 실패했습니다.", "error");
+    } finally {
+      setCheckingUsername(false);
+    }
   };
 
   const update = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,12 +105,14 @@ export default function SignupRequestPage() {
     clearError("businessNumber");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const nextErrors: Partial<Record<keyof FormState, string>> = {};
     if (!form.name.trim()) nextErrors.name = "이름을 입력해주세요.";
     if (!form.birthDate.trim()) nextErrors.birthDate = "생년월일을 입력해주세요.";
+    else if (!BIRTH_DATE_PATTERN.test(form.birthDate.trim()))
+      nextErrors.birthDate = "YYYY.MM.DD 형식으로 입력해주세요.";
     if (!form.phone.trim()) nextErrors.phone = "전화번호를 입력해주세요.";
     if (!form.email.trim()) nextErrors.email = "이메일을 입력해주세요.";
     else if (!EMAIL_PATTERN.test(form.email)) nextErrors.email = "이메일 형식이 올바르지 않습니다.";
@@ -94,8 +126,28 @@ export default function SignupRequestPage() {
     else if (form.password !== form.passwordConfirm) nextErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
 
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) {
-      navigate("/approval-pending");
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      await signup({
+        username: form.username.trim(),
+        password: form.password,
+        realName: form.name.trim(),
+        birthDate: toIsoDate(form.birthDate.trim()),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        businessName: form.businessName.trim(),
+        businessRegistrationNo: form.businessNumber.trim(),
+        submittedStoreAddress: form.address.trim(),
+      });
+      showToast("가입 신청이 완료되었습니다. 로그인 후 승인 상태를 확인해주세요.", "success");
+      navigate("/login");
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "가입 신청에 실패했습니다.";
+      showToast(message, "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -109,21 +161,35 @@ export default function SignupRequestPage() {
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="auth-section">
-          <p className="auth-section-title">
-            <span className="auth-section-step">1</span>기본 정보
-          </p>
+          <div className="card-head" style={{ marginBottom: 4 }}>
+            <span className="card-head-icon">
+              <User size={18} />
+            </span>
+            <div>
+              <p className="card-head-title">기본 정보</p>
+              <p className="card-head-desc">가입자 본인 확인을 위한 정보를 입력해주세요.</p>
+            </div>
+          </div>
           <div className="auth-field-grid">
-            <Field label="이름" placeholder="이름을 입력하세요" value={form.name} onChange={update("name")} error={errors.name} />
+            <Field
+              label="이름"
+              icon={<User size={16} />}
+              placeholder="이름을 입력하세요"
+              value={form.name}
+              onChange={update("name")}
+              error={errors.name}
+            />
             <Field
               label="생년월일"
+              icon={<Calendar size={16} />}
               placeholder="YYYY.MM.DD"
               value={form.birthDate}
               onChange={update("birthDate")}
               error={errors.birthDate}
-              suffix={<Calendar size={16} />}
             />
             <Field
               label="전화번호"
+              icon={<Phone size={16} />}
               placeholder="010-1234-5678"
               inputMode="numeric"
               value={form.phone}
@@ -132,6 +198,7 @@ export default function SignupRequestPage() {
             />
             <Field
               label="이메일"
+              icon={<Mail size={16} />}
               placeholder="example@email.com"
               value={form.email}
               onChange={update("email")}
@@ -141,12 +208,19 @@ export default function SignupRequestPage() {
         </div>
 
         <div className="auth-section">
-          <p className="auth-section-title">
-            <span className="auth-section-step">2</span>사업자 정보
-          </p>
+          <div className="card-head" style={{ marginBottom: 4 }}>
+            <span className="card-head-icon">
+              <Building2 size={18} />
+            </span>
+            <div>
+              <p className="card-head-title">사업자 정보</p>
+              <p className="card-head-desc">운영 중인 사업장 정보를 입력해주세요.</p>
+            </div>
+          </div>
           <div className="auth-field-grid">
             <Field
               label="사업자명"
+              icon={<Building2 size={16} />}
               placeholder="사업자명을 입력하세요"
               value={form.businessName}
               onChange={update("businessName")}
@@ -154,6 +228,7 @@ export default function SignupRequestPage() {
             />
             <Field
               label="사업자등록번호"
+              icon={<Hash size={16} />}
               placeholder="000-00-00000"
               inputMode="numeric"
               value={form.businessNumber}
@@ -162,6 +237,7 @@ export default function SignupRequestPage() {
             />
             <Field
               label="매장 주소"
+              icon={<MapPin size={16} />}
               placeholder="매장 주소를 입력하세요"
               value={form.address}
               onChange={update("address")}
@@ -171,24 +247,37 @@ export default function SignupRequestPage() {
         </div>
 
         <div className="auth-section">
-          <p className="auth-section-title">
-            <span className="auth-section-step">3</span>관리자 계정 정보
-          </p>
+          <div className="card-head" style={{ marginBottom: 4 }}>
+            <span className="card-head-icon">
+              <Lock size={18} />
+            </span>
+            <div>
+              <p className="card-head-title">관리자 계정 정보</p>
+              <p className="card-head-desc">로그인에 사용할 아이디와 비밀번호를 설정해주세요.</p>
+            </div>
+          </div>
           <div className="auth-field-grid">
             <div className="field-with-action">
               <Field
                 label="아이디"
+                icon={<User size={16} />}
                 placeholder="아이디를 입력하세요"
                 value={form.username}
                 onChange={update("username")}
                 error={errors.username}
               />
-              <button type="button" className="field-action-btn">
-                중복 확인
+              <button
+                type="button"
+                className="field-action-btn"
+                onClick={handleCheckUsername}
+                disabled={checkingUsername}
+              >
+                {checkingUsername ? "확인 중..." : "중복 확인"}
               </button>
             </div>
             <Field
               label="비밀번호"
+              icon={<Lock size={16} />}
               type={showPassword ? "text" : "password"}
               placeholder="비밀번호를 입력하세요"
               value={form.password}
@@ -207,6 +296,7 @@ export default function SignupRequestPage() {
             />
             <Field
               label="비밀번호 확인"
+              icon={<Lock size={16} />}
               type={showPasswordConfirm ? "text" : "password"}
               placeholder="비밀번호를 다시 입력하세요"
               value={form.passwordConfirm}
@@ -238,12 +328,12 @@ export default function SignupRequestPage() {
           }
         />
 
-        <Button type="submit" full>
-          승인 요청 보내기
+        <Button type="submit" full disabled={submitting}>
+          {submitting ? "요청 중..." : "승인 요청 보내기"}
         </Button>
 
         <p className="auth-form-footnote">
-          이미 요청하셨나요? <Link to="/approval-pending">로그인 후 승인 결과 확인</Link>
+          이미 요청하셨나요? <Link to="/login">로그인 후 승인 결과 확인</Link>
         </p>
       </form>
     </>

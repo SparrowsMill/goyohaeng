@@ -1,8 +1,17 @@
-import { Sparkles, ExternalLink, MessageCircle, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkles, ExternalLink, MessageCircle, TrendingUp, TrendingDown, Minus, Search } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import DonutChart from "../../components/charts/DonutChart";
+import ComboChart from "../../components/charts/ComboChart";
+import Skeleton from "../../components/ui/Skeleton";
+import EmptyState from "../../components/ui/EmptyState";
+import { useToast } from "../../components/ui/Toast";
+import { ApiError } from "../../api/client";
+import { getNaverAnalytics, type NaverAnalytics } from "../../api/analytics";
 import "./MonitoringPage.css";
 
+// 아래 목업 데이터(TOP 키워드, 블로그/SNS 피드, 채널별 언급 비중, AI 요약)는
+// 백엔드 API 범위 밖(스펙 20장 참고)이라 아직 실제 데이터로 대체할 수 없다.
 const topKeywords = [
   { rank: 1, tag: "전주여행", ratio: 18.7 },
   { rank: 2, tag: "한옥체험", ratio: 13.8 },
@@ -30,7 +39,25 @@ const channelSegments = [
   { label: "기타 SNS/웹", value: 2268, color: "#c9c2ab" },
 ];
 
+const DIRECTION_META = {
+  UP: { icon: TrendingUp, label: "상승", tone: "success" },
+  DOWN: { icon: TrendingDown, label: "하락", tone: "danger" },
+  SAME: { icon: Minus, label: "유지", tone: "neutral" },
+} as const;
+
 export default function MonitoringPage() {
+  const { showToast } = useToast();
+  const [naver, setNaver] = useState<NaverAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getNaverAnalytics()
+      .then(setNaver)
+      .catch((err) => showToast(err instanceof ApiError ? err.message : "네이버 분석 데이터를 불러오지 못했습니다.", "error"))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <PageHeader
@@ -39,9 +66,58 @@ export default function MonitoringPage() {
         hideSettings
       />
 
+      <section className="panel" style={{ marginBottom: 12 }}>
+        <p className="panel-title">
+          <Search size={15} /> 네이버 검색 관심도
+        </p>
+        {loading ? (
+          <Skeleton height={100} />
+        ) : !naver || !naver.available ? (
+          <EmptyState icon={<Search size={18} />} title="아직 집계된 검색 관심도 데이터가 없습니다." />
+        ) : (
+          <>
+            <div className="mention-stat-grid">
+              <div>
+                <p className="mention-stat-value">{naver.searchTerm}</p>
+                <p className="mention-stat-label">등록된 검색어</p>
+              </div>
+              <div>
+                <p className={`mention-stat-value ${naver.direction === "UP" ? "success" : ""}`}>
+                  {naver.latestInterest ? naver.latestInterest.ratio.toFixed(2) : "-"}
+                </p>
+                <p className="mention-stat-label">
+                  최신 관심도
+                  {naver.direction && (
+                    <>
+                      {" · "}
+                      {DIRECTION_META[naver.direction].label}
+                      {naver.difference !== null && ` (${naver.difference > 0 ? "+" : ""}${naver.difference.toFixed(3)})`}
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+            {naver.history.length > 0 && (
+              <ComboChart
+                data={naver.history.map((h) => ({
+                  label: new Date(h.periodStart).toLocaleDateString("ko-KR", { year: "2-digit", month: "short" }),
+                  line: Math.round(h.ratio * 100),
+                }))}
+                detailed
+                area
+                height={140}
+              />
+            )}
+          </>
+        )}
+        <p className="hours-footnote" style={{ marginTop: 8 }}>
+          ratio는 실제 검색 횟수가 아니라 상대적인 검색 관심도예요.
+        </p>
+      </section>
+
       <div className="grid grid-2" style={{ marginBottom: 12, gridTemplateColumns: "1.6fr 1fr" }}>
         <section className="panel">
-          <p className="panel-title">최근 많이 언급되는 키워드 TOP 8</p>
+          <p className="panel-title">최근 많이 언급되는 키워드 TOP 8 (목업 데이터)</p>
           <div className="keyword-top-grid">
             {topKeywords.map((k) => (
               <div className="keyword-top-item" key={k.rank}>
@@ -57,7 +133,7 @@ export default function MonitoringPage() {
 
         <section className="panel ai-summary-panel">
           <p className="panel-title">
-            <Sparkles size={15} /> AI 요약 관심 포인트
+            <Sparkles size={15} /> AI 요약 관심 포인트 (목업 데이터)
           </p>
           <p className="ai-summary-text">
             최근 전주 한옥마을은 감성적인 사진 명소와 한옥 체험에 대한 관심이 높습니다. 전주비빔밥, 감성 분위기 등
@@ -69,7 +145,7 @@ export default function MonitoringPage() {
 
       <div className="grid grid-2" style={{ gridTemplateColumns: "1.6fr 1fr", alignItems: "start" }}>
         <section className="panel">
-          <p className="panel-title">관련 블로그 및 SNS 전체 언급</p>
+          <p className="panel-title">관련 블로그 및 SNS 전체 언급 (목업 데이터)</p>
           <ul className="post-list">
             {posts.map((p) => (
               <li key={p.title}>
@@ -93,12 +169,12 @@ export default function MonitoringPage() {
 
         <div className="stack">
           <section className="panel">
-            <p className="panel-title">채널별 언급 비중</p>
+            <p className="panel-title">채널별 언급 비중 (목업 데이터)</p>
             <DonutChart segments={channelSegments} centerLabel="12,864 건" />
           </section>
 
           <section className="panel">
-            <p className="panel-title">최근 언급 현황</p>
+            <p className="panel-title">최근 언급 현황 (목업 데이터)</p>
             <div className="mention-stat-grid">
               <div>
                 <span className="mention-stat-icon">

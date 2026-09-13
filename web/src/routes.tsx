@@ -4,6 +4,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupRequestPage from "./pages/auth/SignupRequestPage";
 import ApprovalStatusPage from "./pages/auth/ApprovalStatusPage";
+import { RequireAuth, RequireApproved } from "./auth/guards";
 import StatsDashboardPage from "./pages/stats/StatsDashboardPage";
 import MonitoringPage from "./pages/stats/MonitoringPage";
 import ReportErrorPage from "./pages/stats/ReportErrorPage";
@@ -18,32 +19,22 @@ export const router = createBrowserRouter([
   { path: "/login", element: <AuthLayout><LoginPage /></AuthLayout> },
   { path: "/signup", element: <AuthLayout wide><SignupRequestPage /></AuthLayout> },
   {
-    path: "/approval-pending",
+    path: "/approval-status",
     element: (
-      <AuthLayout>
-        <ApprovalStatusPage status="pending" />
-      </AuthLayout>
-    ),
-  },
-  {
-    path: "/approval-rejected",
-    element: (
-      <AuthLayout>
-        <ApprovalStatusPage status="rejected" />
-      </AuthLayout>
-    ),
-  },
-  {
-    path: "/approval-approved",
-    element: (
-      <AuthLayout>
-        <ApprovalStatusPage status="approved" />
-      </AuthLayout>
+      <RequireAuth>
+        <AuthLayout>
+          <ApprovalStatusPage />
+        </AuthLayout>
+      </RequireAuth>
     ),
   },
   {
     path: "/",
-    element: <AdminLayout />,
+    element: (
+      <RequireApproved>
+        <AdminLayout />
+      </RequireApproved>
+    ),
     children: [
       { index: true, element: <Navigate to="/visit-auth" replace /> },
       { path: "stats", element: <StatsDashboardPage /> },

@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&display=swap');
 
 :root {
-  /* ---- warm modern + Korean heritage: ivory bg, white surface, clearly stepped ---- */
-  --color-bg: #f4f1e8;
+  /* ---- warm modern + Korean heritage: white bg, clearly stepped surfaces ---- */
+  --color-bg: #ffffff;
   --color-bg-soft: #ece6d5;
   --color-surface: #ffffff;
   --color-surface-alt: #faf8f0;
@@ -32,11 +32,15 @@
   --color-info: #6e7c8a;
   --color-info-soft: #e4e8ec;
 
+  /* ---- accent: yellow-green (연두) — matches the mobile app's brand feel, used only as a decorative point ---- */
+  --color-accent: #90a83c;
+  --color-accent-soft: #eef2d6;
+
   --radius-sm: 0;
   --radius-md: 0;
-  --radius-lg: 0;
+  --radius-lg: 28px;
 
-  --shadow-card: 0 1px 2px rgba(37, 33, 20, 0.04), 0 2px 8px rgba(37, 33, 20, 0.05);
+  --shadow-card: 0 14px 32px rgba(37, 33, 20, 0.09), 0 2px 8px rgba(37, 33, 20, 0.05);
   --shadow-pop: 0 12px 32px rgba(37, 33, 20, 0.16);
 
   --font-sans: 'Noto Sans KR', system-ui, -apple-system, sans-serif;

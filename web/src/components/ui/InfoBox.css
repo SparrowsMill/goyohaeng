@@ -13,6 +13,15 @@
   border-color: #d9e2c4;
 }
 
+.info-box-danger {
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger);
+}
+
+.info-box-danger .info-box-icon {
+  color: var(--color-danger);
+}
+
 .info-box-icon {
   flex-shrink: 0;
   display: flex;

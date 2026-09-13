@@ -12,9 +12,10 @@ interface ModalProps {
   children?: ReactNode;
   footer?: ReactNode;
   maxWidth?: number;
+  className?: string;
 }
 
-export default function Modal({ open, onClose, title, description, children, footer, maxWidth }: ModalProps) {
+export default function Modal({ open, onClose, title, description, children, footer, maxWidth, className }: ModalProps) {
   useEffect(() => {
     if (!open) return;
 
@@ -30,7 +31,7 @@ export default function Modal({ open, onClose, title, description, children, foo
   return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="modal-box"
+        className={`modal-box ${className ?? ""}`}
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}

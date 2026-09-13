@@ -14,12 +14,63 @@
 }
 
 .hours-table td {
-  padding: 9px 6px;
+  padding: 6px;
   border-bottom: 1px solid var(--color-border-soft);
 }
 
 .hours-table tr:last-child td {
   border-bottom: none;
+}
+
+.hours-table-day {
+  white-space: nowrap;
+}
+
+.hours-summary-td {
+  text-align: center;
+  line-height: 1.5;
+}
+
+.hours-summary-sep {
+  line-height: 1;
+  color: var(--color-text-faint);
+  font-size: 11px;
+}
+
+.hours-time-input {
+  height: 30px;
+  max-width: 130px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+input[type="time"] {
+  width: auto;
+}
+
+input[type="time"]::-webkit-datetime-edit {
+  flex: none;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  margin-left: 4px;
+  padding: 0;
+}
+
+.hours-fill-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.hours-fill-body {
+  flex: 1;
+}
+
+.hours-fill-body-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hours-footnote {
@@ -47,6 +98,10 @@
 
 .break-time-inputs .text-input {
   flex: 1;
+}
+
+.break-time-inputs input[type="time"] {
+  flex: none;
 }
 
 .special-schedule-list {
@@ -114,13 +169,57 @@
 .radio-options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13.5px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 10px;
+  font-size: 12.5px;
   font-weight: 600;
+  color: var(--color-text-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.radio-option:hover {
+  background: var(--color-surface-alt);
+}
+
+.radio-option:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-soft-text);
+}
+
+.radio-option input[type="radio"] {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+
+.radio-option:hover input[type="radio"] {
+  border-color: var(--color-primary);
+}
+
+.radio-option input[type="radio"]:checked {
+  border-color: var(--color-primary);
+}
+
+.radio-option input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--color-primary);
 }

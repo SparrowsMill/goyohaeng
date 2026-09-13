@@ -47,26 +47,6 @@
   border-top: none;
 }
 
-.auth-section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.auth-section-step {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .auth-field-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

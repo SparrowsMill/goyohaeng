@@ -5,7 +5,7 @@ interface InfoBoxProps {
   icon: ReactNode;
   title: ReactNode;
   description?: ReactNode;
-  tone?: "neutral" | "primary";
+  tone?: "neutral" | "primary" | "danger";
 }
 
 export default function InfoBox({ icon, title, description, tone = "neutral" }: InfoBoxProps) {

@@ -1,45 +1,83 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { Clock, Search, Zap } from "lucide-react";
+import {
+  Clock,
+  Search,
+  Zap,
+  Ban,
+  IdCard,
+  CheckCircle2,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import PageHeader from "../../components/PageHeader";
-import Badge from "../../components/ui/Badge";
+import Badge, { type BadgeTone } from "../../components/ui/Badge";
 import Toggle from "../../components/ui/Toggle";
 import Table from "../../components/ui/Table";
-import Pagination from "../../components/ui/Pagination";
 import EmptyState from "../../components/ui/EmptyState";
 import Modal from "../../components/ui/Modal";
 import Button from "../../components/ui/Button";
 import { useToast } from "../../components/ui/Toast";
+import { ApiError } from "../../api/client";
+import {
+  approveVerification,
+  getCustomerVerifiedVisitCount,
+  getIntakeSetting,
+  getVerificationHours,
+  getVisitVerification,
+  getVisitVerificationSummary,
+  getVisitVerifications,
+  rejectVerification,
+  updateIntakeSetting,
+  type VerificationHourItem,
+  type VisitVerificationDetail,
+  type VisitVerificationListItem,
+  type VisitVerificationSummary,
+} from "../../api/visitVerifications";
+import type { VerificationStatus } from "../../api/dashboard";
 import "./VisitAuthManagePage.css";
 
-type SessionTone = "info" | "success" | "danger";
+const STATUS_META: Record<VerificationStatus, { label: string; tone: BadgeTone; icon: typeof Clock }> = {
+  ISSUED: { label: "방문 예정", tone: "info", icon: Clock },
+  VERIFIED: { label: "인증 완료", tone: "success", icon: CheckCircle2 },
+  EXPIRED: { label: "시간 만료", tone: "danger", icon: AlertTriangle },
+  FAILED: { label: "거절됨", tone: "danger", icon: Ban },
+  CANCELLED: { label: "취소됨", tone: "neutral", icon: Ban },
+};
 
-interface Session {
-  code: string;
-  expiresAt: string;
-  countdown: string;
-  remaining: number | null;
-  scheduled: string;
-  status: string;
-  tone: SessionTone;
-}
-
-const initialSessions: Session[] = [
-  { code: "482915", expiresAt: "2025-05-20 14:05:43", countdown: "만료까지 01:12", remaining: 72, scheduled: "2025-05-20 14:02:18", status: "방문 예정", tone: "info" },
-  { code: "731069", expiresAt: "2025-05-20 14:12:07", countdown: "만료까지 -", remaining: null, scheduled: "2025-05-20 13:12:07", status: "인증 완료", tone: "success" },
-  { code: "260384", expiresAt: "2025-05-20 13:48:55", countdown: "만료까지 -", remaining: null, scheduled: "2025-05-20 12:48:55", status: "인증 완료", tone: "success" },
-  { code: "598742", expiresAt: "2025-05-20 13:40:21", countdown: "만료까지 04:58", remaining: 298, scheduled: "2025-05-20 13:40:21", status: "방문 예정", tone: "info" },
-  { code: "914628", expiresAt: "2025-05-20 13:12:07", countdown: "만료됨", remaining: null, scheduled: "2025-05-20 12:57:07", status: "시간 만료", tone: "danger" },
-  { code: "305871", expiresAt: "2025-05-20 12:03:33", countdown: "만료됨", remaining: null, scheduled: "2025-05-20 11:48:33", status: "시간 만료", tone: "danger" },
-  { code: "148236", expiresAt: "2025-05-20 11:42:08", countdown: "만료까지 -", remaining: null, scheduled: "2025-05-20 11:12:08", status: "인증 완료", tone: "success" },
-  { code: "673920", expiresAt: "2025-05-20 11:20:15", countdown: "만료까지 09:44", remaining: 584, scheduled: "2025-05-20 11:18:15", status: "방문 예정", tone: "info" },
-  { code: "502187", expiresAt: "2025-05-20 10:55:47", countdown: "만료됨", remaining: null, scheduled: "2025-05-20 10:40:47", status: "시간 만료", tone: "danger" },
-  { code: "817364", expiresAt: "2025-05-20 10:31:29", countdown: "만료까지 -", remaining: null, scheduled: "2025-05-20 10:05:29", status: "인증 완료", tone: "success" },
+const FILTERS: { label: string; status?: VerificationStatus; statuses?: VerificationStatus[] }[] = [
+  { label: "전체" },
+  { label: "방문 예정", status: "ISSUED" },
+  { label: "인증 완료", status: "VERIFIED" },
+  { label: "시간 만료", status: "EXPIRED" },
+  { label: "취소/거절", statuses: ["CANCELLED", "FAILED"] },
 ];
 
-const filters = ["전체", "방문 예정", "인증 완료", "시간 만료"];
+const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 const POPOVER_WIDTH = 300;
+const PAGE_SIZE = 5;
+
+function todayDayOfWeek() {
+  const jsDay = new Date().getDay();
+  return jsDay === 0 ? 7 : jsDay;
+}
+
+function todayDateString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatDateTime(value: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 function formatCountdown(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60);
@@ -49,44 +87,90 @@ function formatCountdown(totalSeconds: number) {
 
 export default function VisitAuthManagePage() {
   const { showToast } = useToast();
-  const [sessions, setSessions] = useState(initialSessions);
-  const [visitOn, setVisitOn] = useState(true);
-  const [filter, setFilter] = useState("전체");
+  const [items, setItems] = useState<VisitVerificationListItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [visitOn, setVisitOn] = useState(false);
+  const [intakeLoaded, setIntakeLoaded] = useState(false);
+  const [verificationHours, setVerificationHours] = useState<VerificationHourItem[] | null>(null);
+  const [summary, setSummary] = useState<VisitVerificationSummary | null>(null);
+  const [todayFailureCount, setTodayFailureCount] = useState<number | null>(null);
+  const [filterIndex, setFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [confirmCode, setConfirmCode] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [approveTarget, setApproveTarget] = useState<VisitVerificationListItem | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<VisitVerificationListItem | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [pendingToggle, setPendingToggle] = useState<boolean | null>(null);
-  const [detailInfo, setDetailInfo] = useState<{ code: string; top: number; left: number } | null>(null);
-  const pageSize = 5;
+  const [actionBusy, setActionBusy] = useState(false);
+  const [detailInfo, setDetailInfo] = useState<{ id: number; bottom: number; left: number } | null>(null);
+  const [detail, setDetail] = useState<VisitVerificationDetail | null>(null);
+  const [visitCount, setVisitCount] = useState<number | null>(null);
+
+  const loadList = useCallback(() => {
+    setLoading(true);
+    const activeFilter = FILTERS[filterIndex];
+    const code = search.trim() || undefined;
+    const statuses = activeFilter.statuses ?? [activeFilter.status];
+
+    Promise.all(statuses.map((status) => getVisitVerifications({ status, code, limit: 100 })))
+      .then((results) => {
+        const merged = results.flatMap((r) => r.items);
+        merged.sort((a, b) => {
+          const at = new Date(a.expectedArrivalAt ?? a.issuedAt).getTime();
+          const bt = new Date(b.expectedArrivalAt ?? b.issuedAt).getTime();
+          return bt - at;
+        });
+        setItems(merged.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
+        setTotal(merged.length);
+        setTotalPages(Math.max(1, Math.ceil(merged.length / PAGE_SIZE)));
+      })
+      .catch((err) => {
+        showToast(err instanceof ApiError ? err.message : "목록을 불러오지 못했습니다.", "error");
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterIndex, search, page]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setSessions((prev) =>
-        prev.map((s) => {
-          if (s.remaining === null) return s;
-          const next = s.remaining - 1;
-          if (next <= 0) {
-            return { ...s, remaining: null, countdown: "만료됨", status: "시간 만료", tone: "danger" as const };
-          }
-          return { ...s, remaining: next, countdown: `만료까지 ${formatCountdown(next)}` };
-        })
-      );
-    }, 1000);
+    loadList();
+  }, [loadList]);
+
+  useEffect(() => {
+    getVisitVerificationSummary()
+      .then((res) => {
+        setSummary(res);
+        const today = todayDateString();
+        Promise.all([
+          getVisitVerifications({ status: "FAILED", startDate: today, endDate: today, limit: 1 }),
+          getVisitVerifications({ status: "CANCELLED", startDate: today, endDate: today, limit: 1 }),
+        ])
+          .then(([failedRes, cancelledRes]) => {
+            setTodayFailureCount(res.todayExpiredCount + failedRes.total + cancelledRes.total);
+          })
+          .catch(() => setTodayFailureCount(null));
+      })
+      .catch(() => {});
+    getIntakeSetting()
+      .then((res) => {
+        setVisitOn(res.enabled);
+        setIntakeLoaded(true);
+      })
+      .catch(() => setIntakeLoaded(true));
+    getVerificationHours()
+      .then((res) => setVerificationHours(res.hours))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const filteredSessions = sessions.filter((s) => {
-    const matchesFilter = filter === "전체" || s.status === filter;
-    const matchesSearch = search.trim() === "" || s.code.includes(search);
-    return matchesFilter && matchesSearch;
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredSessions.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pagedSessions = filteredSessions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  const updateFilter = (f: string) => {
-    setFilter(f);
+  const updateFilter = (index: number) => {
+    setFilterIndex(index);
     setPage(1);
   };
 
@@ -96,35 +180,78 @@ export default function VisitAuthManagePage() {
   };
 
   const requestToggleVisit = (next: boolean) => setPendingToggle(next);
-
   const cancelToggleVisit = () => setPendingToggle(null);
 
-  const confirmToggleVisit = () => {
+  const confirmToggleVisit = async () => {
     if (pendingToggle === null) return;
-    setVisitOn(pendingToggle);
-    setPendingToggle(null);
+    try {
+      const res = await updateIntakeSetting(pendingToggle);
+      setVisitOn(res.enabled);
+      showToast(res.enabled ? "방문 인증을 켰습니다." : "방문 인증을 껐습니다.", "success");
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : "설정 변경에 실패했습니다.", "error");
+    } finally {
+      setPendingToggle(null);
+    }
   };
 
-  const handleConfirmVisit = () => {
-    if (!confirmCode) return;
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.code === confirmCode
-          ? { ...s, status: "인증 완료", tone: "success" as const, remaining: null, countdown: "만료까지 -" }
-          : s
-      )
-    );
-    showToast(`인증번호 ${confirmCode}의 방문 인증이 완료되었습니다.`, "success");
-    setConfirmCode(null);
+  const handleApprove = async () => {
+    if (!approveTarget) return;
+    setActionBusy(true);
+    try {
+      await approveVerification(approveTarget.id);
+      showToast(`인증번호 ${approveTarget.verificationCode}의 방문 인증이 완료되었습니다.`, "success");
+      loadList();
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : "인증 승인에 실패했습니다.", "error");
+    } finally {
+      setActionBusy(false);
+      setApproveTarget(null);
+    }
   };
 
-  const toggleDetail = (code: string) => (e: React.MouseEvent<HTMLElement>) => {
+  const handleReject = async () => {
+    if (!rejectTarget) return;
+    if (!rejectReason.trim()) {
+      showToast("거절 사유를 입력해주세요.", "info");
+      return;
+    }
+    setActionBusy(true);
+    try {
+      await rejectVerification(rejectTarget.id, rejectReason.trim());
+      showToast(`인증번호 ${rejectTarget.verificationCode}의 방문 인증을 거절했습니다.`, "success");
+      loadList();
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : "인증 거절에 실패했습니다.", "error");
+    } finally {
+      setActionBusy(false);
+      setRejectTarget(null);
+      setRejectReason("");
+    }
+  };
+
+  const toggleDetail = (item: VisitVerificationListItem) => (e: React.MouseEvent<HTMLElement>) => {
+    if (detailInfo && detailInfo.id === item.id) {
+      setDetailInfo(null);
+      setDetail(null);
+      return;
+    }
     const rect = e.currentTarget.getBoundingClientRect();
-    setDetailInfo((prev) =>
-      prev && prev.code === code
-        ? null
-        : { code, top: rect.bottom + 8, left: Math.max(12, rect.right - POPOVER_WIDTH) }
-    );
+    setDetailInfo({
+      id: item.id,
+      bottom: window.innerHeight - rect.top + 10,
+      left: Math.min(Math.max(12, rect.right - POPOVER_WIDTH), window.innerWidth - POPOVER_WIDTH - 12),
+    });
+    setDetail(null);
+    setVisitCount(null);
+    getVisitVerification(item.id)
+      .then((res) => {
+        setDetail(res);
+        getCustomerVerifiedVisitCount(res.user.id)
+          .then(setVisitCount)
+          .catch(() => setVisitCount(null));
+      })
+      .catch(() => setDetail(null));
   };
 
   useEffect(() => {
@@ -133,19 +260,61 @@ export default function VisitAuthManagePage() {
       const target = e.target as HTMLElement;
       if (target.closest(".session-detail-popover") || target.closest(".session-detail-trigger")) return;
       setDetailInfo(null);
+      setDetail(null);
     };
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, [detailInfo]);
 
+  const todayHours = verificationHours?.find((h) => h.dayOfWeek === todayDayOfWeek());
+
   return (
-    <>
-      <PageHeader title="방문 인증 관리" hideSettings />
+    <div className="visit-auth-page">
+      <PageHeader
+        title="방문 인증 관리"
+        icon={<img src="/assets/방문 인증.png" alt="" className="page-title-icon-img" />}
+        iconPlain
+        hideSettings
+        right={
+          <div className="visit-stat-cards">
+            <span className="today-tag">TODAY</span>
+            <div className="visit-stat-card tone-success">
+              <span className="visit-stat-card-icon visit-stat-card-icon-plain">
+                <img src="/assets/calander.png" alt="" className="visit-stat-card-icon-img" />
+              </span>
+              <div>
+                <p className="visit-stat-card-value">{summary?.activeSessionCount ?? "-"}</p>
+                <p className="visit-stat-card-label">방문 예정</p>
+              </div>
+            </div>
+            <div className="visit-stat-card-divider" />
+            <div className="visit-stat-card tone-success">
+              <span className="visit-stat-card-icon visit-stat-card-icon-plain">
+                <img src="/assets/success.png" alt="" className="visit-stat-card-icon-img" />
+              </span>
+              <div>
+                <p className="visit-stat-card-value">{summary?.todayVerifiedCount ?? "-"}</p>
+                <p className="visit-stat-card-label">인증 완료</p>
+              </div>
+            </div>
+            <div className="visit-stat-card-divider" />
+            <div className="visit-stat-card tone-warning">
+              <span className="visit-stat-card-icon visit-stat-card-icon-plain">
+                <img src="/assets/failed.png" alt="" className="visit-stat-card-icon-img" />
+              </span>
+              <div>
+                <p className="visit-stat-card-value">{todayFailureCount ?? "-"}</p>
+                <p className="visit-stat-card-label">인증 실패</p>
+              </div>
+            </div>
+          </div>
+        }
+      />
 
       <div className="visit-status-bar">
         <div className="visit-status-toggle">
           <Toggle checked={visitOn} onChange={requestToggleVisit} />
-          <span className="visit-toggle-state">{visitOn ? "ON" : "OFF"}</span>
+          <span className="visit-toggle-state">{intakeLoaded ? (visitOn ? "ON" : "OFF") : "-"}</span>
           <span>방문 인증</span>
         </div>
 
@@ -153,25 +322,14 @@ export default function VisitAuthManagePage() {
 
         <div className="visit-status-hours">
           <Clock size={14} />
-          <span>10:00 - 13:00 / 15:00 - 18:00</span>
+          <span>
+            {todayHours
+              ? todayHours.enabled
+                ? `오늘(${DAY_LABELS[todayHours.dayOfWeek - 1]}) ${todayHours.startTime ?? "-"} ~ ${todayHours.endTime ?? "-"}`
+                : "오늘은 인증 불가"
+              : "매장 운영시간과 동일"}
+          </span>
           <Link to="/places/hours">수정</Link>
-        </div>
-
-        <div className="visit-status-metrics">
-          <div className="visit-status-metric">
-            <p className="visit-status-metric-value">8</p>
-            <p className="visit-status-metric-label">방문 예정</p>
-          </div>
-          <div className="visit-status-divider" />
-          <div className="visit-status-metric">
-            <p className="visit-status-metric-value">27</p>
-            <p className="visit-status-metric-label">오늘 인증 완료</p>
-          </div>
-          <div className="visit-status-divider" />
-          <div className="visit-status-metric warning">
-            <p className="visit-status-metric-value">9</p>
-            <p className="visit-status-metric-label">시간 만료</p>
-          </div>
         </div>
       </div>
 
@@ -185,9 +343,9 @@ export default function VisitAuthManagePage() {
 
         <div className="session-toolbar">
           <div className="session-filter-tabs">
-            {filters.map((f) => (
-              <button key={f} className={filter === f ? "active" : ""} onClick={() => updateFilter(f)}>
-                {f}
+            {FILTERS.map((f, i) => (
+              <button key={f.label} className={filterIndex === i ? "active" : ""} onClick={() => updateFilter(i)}>
+                {f.label}
               </button>
             ))}
           </div>
@@ -205,69 +363,131 @@ export default function VisitAuthManagePage() {
         </div>
 
         <Table
-          rowKey={(s) => s.code}
-          data={pagedSessions}
+          rowKey={(s) => s.id}
+          data={loading ? [] : items}
           emptyMessage={
-            <EmptyState
-              icon={<Search size={18} />}
-              title="조건에 맞는 인증 세션이 없습니다."
-              description="필터나 검색어를 변경해보세요."
-            />
+            loading ? (
+              <EmptyState icon={<Search size={18} />} title="불러오는 중..." />
+            ) : (
+              <EmptyState
+                icon={<Search size={18} />}
+                title="조건에 맞는 인증 세션이 없습니다."
+                description="필터나 검색어를 변경해보세요."
+              />
+            )
           }
           columns={[
             {
               key: "code",
               header: "6자리 인증번호",
-              render: (s) => (
-                <div className="session-code-cell">
-                  <span className="mono">{s.code}</span>
-                  {s.status === "방문 예정" && (
-                    <button type="button" className="session-confirm-btn" onClick={() => setConfirmCode(s.code)}>
+              render: (s) => <span className="mono">{s.verificationCode}</span>,
+            },
+            {
+              key: "action-buttons",
+              header: "작업",
+              render: (s) =>
+                s.status === "ISSUED" ? (
+                  <div className="session-action-buttons">
+                    <button type="button" className="session-confirm-btn" onClick={() => setApproveTarget(s)}>
                       <Zap size={11} /> 인증하기
                     </button>
-                  )}
-                </div>
-              ),
+                    <button
+                      type="button"
+                      className="session-confirm-btn danger"
+                      onClick={() => setRejectTarget(s)}
+                    >
+                      <Ban size={11} /> 거절
+                    </button>
+                  </div>
+                ) : (
+                  <span className="table-subtext">-</span>
+                ),
             },
-            { key: "status", header: "상태", render: (s) => <Badge tone={s.tone}>{s.status}</Badge> },
-            { key: "scheduled", header: "정상/방문 예정 시간", render: (s) => s.scheduled },
+            {
+              key: "status",
+              header: "상태",
+              render: (s) => {
+                const meta = STATUS_META[s.status];
+                const StatusIcon = meta.icon;
+                return (
+                  <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
+                    {meta.label}
+                  </Badge>
+                );
+              },
+            },
+            {
+              key: "scheduled",
+              header: "방문 예정 시간",
+              render: (s) => formatDateTime(s.expectedArrivalAt ?? s.issuedAt),
+            },
             {
               key: "expiresAt",
-              header: "인증 완료 시간",
-              render: (s) => (
-                <>
-                  {s.expiresAt}
-                  <br />
-                  <span className="table-subtext">{s.countdown}</span>
-                </>
-              ),
+              header: "인증 완료 / 만료 시간",
+              render: (s) => {
+                if (s.status === "VERIFIED") return formatDateTime(s.verifiedAt);
+                if (s.status !== "ISSUED") return formatDateTime(s.expiresAt);
+                const remaining = Math.max(0, Math.floor((new Date(s.expiresAt).getTime() - now) / 1000));
+                return (
+                  <>
+                    {formatDateTime(s.expiresAt)}
+                    <br />
+                    <span className="table-subtext">
+                      {remaining > 0 ? `만료까지 ${formatCountdown(remaining)}` : "만료됨"}
+                    </span>
+                  </>
+                );
+              },
             },
             {
               key: "actions",
-              header: "작업",
+              header: "",
               render: (s) => (
-                <button
-                  type="button"
-                  className="link-btn session-detail-trigger"
-                  onClick={toggleDetail(s.code)}
-                >
-                  상세보기
+                <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
+                  상세보기 <ChevronRight size={14} />
                 </button>
               ),
             },
           ]}
         />
 
-        <Pagination
-          page={currentPage}
-          totalPages={totalPages}
-          totalCount={filteredSessions.length}
-          pageSize={pageSize}
-          onPageChange={setPage}
-        />
+        <div className="visit-pagination">
+          <button
+            type="button"
+            className="visit-pagination-arrow"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            aria-label="이전 페이지"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              type="button"
+              className={`visit-pagination-page ${p === page ? "active" : ""}`}
+              onClick={() => setPage(p)}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="visit-pagination-arrow"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            aria-label="다음 페이지"
+          >
+            <ChevronRight size={16} />
+          </button>
+          <span className="visit-pagination-count">
+            {total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, total)} of {total}
+          </span>
+        </div>
       </section>
 
       <Modal
+        className="visit-modal"
         open={pendingToggle !== null}
         onClose={cancelToggleVisit}
         title={pendingToggle ? "방문 인증을 켤까요?" : "방문 인증을 끌까요?"}
@@ -287,49 +507,97 @@ export default function VisitAuthManagePage() {
       />
 
       <Modal
-        open={confirmCode !== null}
-        onClose={() => setConfirmCode(null)}
+        className="visit-modal"
+        open={approveTarget !== null}
+        onClose={() => setApproveTarget(null)}
         title="바로 인증 처리할까요?"
-        description={confirmCode ? `인증번호 ${confirmCode}의 방문을 지금 바로 인증 완료로 처리해요.` : undefined}
+        description={approveTarget ? `인증번호 ${approveTarget.verificationCode}의 방문을 지금 바로 인증 완료로 처리해요.` : undefined}
         footer={
           <>
-            <Button variant="secondary" onClick={() => setConfirmCode(null)}>
+            <Button variant="secondary" onClick={() => setApproveTarget(null)} disabled={actionBusy}>
               취소
             </Button>
-            <Button onClick={handleConfirmVisit}>확인</Button>
+            <Button onClick={handleApprove} disabled={actionBusy}>
+              확인
+            </Button>
           </>
         }
       />
 
+      <Modal
+        className="visit-modal"
+        open={rejectTarget !== null}
+        onClose={() => {
+          setRejectTarget(null);
+          setRejectReason("");
+        }}
+        title="방문 인증을 거절할까요?"
+        description={rejectTarget ? `인증번호 ${rejectTarget.verificationCode}의 방문 인증을 거절 처리해요.` : undefined}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setRejectTarget(null);
+                setRejectReason("");
+              }}
+              disabled={actionBusy}
+            >
+              취소
+            </Button>
+            <Button variant="danger" onClick={handleReject} disabled={actionBusy}>
+              거절
+            </Button>
+          </>
+        }
+      >
+        <textarea
+          className="textarea-input"
+          style={{ minHeight: 90 }}
+          placeholder="거절 사유를 입력해주세요."
+          maxLength={500}
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+        />
+      </Modal>
+
       {detailInfo &&
         createPortal(
-          <div className="session-detail-popover" style={{ top: detailInfo.top, left: detailInfo.left }}>
-            <p className="session-detail-popover-title">방문 인증 세션 정보</p>
-            <dl className="session-detail-kv">
-              <div>
-                <dt>고객 제시 인증 번호</dt>
-                <dd>{detailInfo.code}</dd>
-              </div>
-              <div>
-                <dt>세션 번호</dt>
-                <dd>SESSION-0520-0015</dd>
-              </div>
-              <div>
-                <dt>방문자 닉네임</dt>
-                <dd>yejin_travel</dd>
-              </div>
-              <div>
-                <dt>방문 장소</dt>
-                <dd>전주 한옥마을</dd>
-              </div>
-              <div>
-                <dt>방문 인원</dt>
-                <dd>2명</dd>
-              </div>
-            </dl>
+          <div className="session-detail-popover" style={{ bottom: detailInfo.bottom, left: detailInfo.left }}>
+            <p className="session-detail-popover-title">
+              <IdCard size={14} /> 방문 인증 세션 정보
+            </p>
+            {!detail ? (
+              <p className="hours-footnote">불러오는 중...</p>
+            ) : (
+              <dl className="session-detail-kv">
+                <div>
+                  <dt>고객명</dt>
+                  <dd>{detail.user.realName ?? "-"}</dd>
+                </div>
+                <div>
+                  <dt>방문 횟수</dt>
+                  <dd>{visitCount === null ? "-" : `${visitCount}회`}</dd>
+                </div>
+                <div>
+                  <dt>도착 예정 옵션</dt>
+                  <dd>{detail.arrivalOptionMinutes ? `${detail.arrivalOptionMinutes}분 이내` : "-"}</dd>
+                </div>
+                <div>
+                  <dt>발급 시각</dt>
+                  <dd>{formatDateTime(detail.issuedAt)}</dd>
+                </div>
+                {detail.status === "FAILED" && (
+                  <div className="session-detail-fail-reason">
+                    <dt>거절 사유</dt>
+                    <dd>{detail.failReason ?? "-"}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
           </div>,
           document.body
         )}
-    </>
+    </div>
   );
 }

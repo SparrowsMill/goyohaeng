@@ -12,6 +12,8 @@ interface Crumb {
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
+  icon?: ReactNode;
+  iconPlain?: boolean;
   breadcrumbs?: Crumb[];
   showVisitToggle?: boolean;
   hideSettings?: boolean;
@@ -21,6 +23,8 @@ interface PageHeaderProps {
 export default function PageHeader({
   title,
   subtitle,
+  icon,
+  iconPlain = false,
   breadcrumbs,
   showVisitToggle = false,
   hideSettings = false,
@@ -31,19 +35,22 @@ export default function PageHeader({
   return (
     <div className="page-header">
       <div className="page-header-top">
-        <div>
-          {breadcrumbs && (
-            <nav className="page-breadcrumbs">
-              {breadcrumbs.map((crumb, i) => (
-                <span key={crumb.label} className="page-breadcrumb-item">
-                  {i > 0 && <ChevronRight size={13} />}
-                  {crumb.to ? <Link to={crumb.to}>{crumb.label}</Link> : <span>{crumb.label}</span>}
-                </span>
-              ))}
-            </nav>
-          )}
-          <h1 className="page-title">{title}</h1>
-          {subtitle && <p className="page-subtitle">{subtitle}</p>}
+        <div className={icon ? "page-title-row" : undefined}>
+          {icon && <span className={`page-title-icon ${iconPlain ? "page-title-icon-plain" : ""}`}>{icon}</span>}
+          <div>
+            {breadcrumbs && (
+              <nav className="page-breadcrumbs">
+                {breadcrumbs.map((crumb, i) => (
+                  <span key={crumb.label} className="page-breadcrumb-item">
+                    {i > 0 && <ChevronRight size={13} />}
+                    {crumb.to ? <Link to={crumb.to}>{crumb.label}</Link> : <span>{crumb.label}</span>}
+                  </span>
+                ))}
+              </nav>
+            )}
+            <h1 className="page-title">{title}</h1>
+            {subtitle && <p className="page-subtitle">{subtitle}</p>}
+          </div>
         </div>
 
         <div className="page-header-right">
@@ -59,7 +66,7 @@ export default function PageHeader({
           {right}
           {!right && !hideSettings && (
             <Link to="/settings" className="page-settings-btn">
-              <Settings size={15} /> 설정
+              <Settings size={15} /> 계정 관리
             </Link>
           )}
         </div>

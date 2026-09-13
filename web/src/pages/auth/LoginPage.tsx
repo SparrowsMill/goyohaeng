@@ -4,16 +4,20 @@ import { User, Lock, Eye, EyeOff } from "lucide-react";
 import AuthHeader from "../../components/ui/AuthHeader";
 import Field from "../../components/ui/Field";
 import Button from "../../components/ui/Button";
+import { useAuth } from "../../auth/AuthContext";
+import { ApiError } from "../../api/client";
 import "./AuthForm.css";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const nextErrors: typeof errors = {};
@@ -21,8 +25,22 @@ export default function LoginPage() {
     if (!password) nextErrors.password = "비밀번호를 입력해주세요.";
 
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) {
-      navigate("/");
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      const res = await login(username.trim(), password);
+      navigate(res.businessAccount.status === "APPROVED" ? "/" : "/approval-status");
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.status === 401
+            ? "아이디나 비밀번호가 올바르지 않습니다."
+            : err.message
+          : "로그인에 실패했습니다.";
+      setErrors({ password: message });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -65,8 +83,8 @@ export default function LoginPage() {
           }
         />
 
-        <Button type="submit" full>
-          로그인
+        <Button type="submit" full disabled={submitting}>
+          {submitting ? "로그인 중..." : "로그인"}
         </Button>
 
         <p className="auth-form-footnote">

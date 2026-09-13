@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link2, FileText, Unlink, PenLine, Megaphone, Clock, Mail, Sparkles } from "lucide-react";
+import { Link2, FileText, Unlink, PenLine, Megaphone, Clock, Mail, Sparkles, Info } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Button from "../../components/ui/Button";
 import Field from "../../components/ui/Field";
+import InfoBox from "../../components/ui/InfoBox";
 import "./ReportErrorPage.css";
 
 const types = [
@@ -27,7 +28,14 @@ export default function ReportErrorPage() {
         showVisitToggle
       />
 
-      <div className="grid grid-2" style={{ gridTemplateColumns: "1.8fr 1fr", alignItems: "start" }}>
+      <InfoBox
+        tone="primary"
+        icon={<Info size={16} />}
+        title="정보 오류 신고 기능은 준비 중입니다."
+        description="아래 폼은 미리보기이며, 제출해도 실제로 접수되지 않아요."
+      />
+
+      <div className="grid grid-2" style={{ gridTemplateColumns: "1.8fr 1fr", alignItems: "start", marginTop: 16 }}>
         <section className="panel">
           <div style={{ marginBottom: 24 }}>
             <Field label="잘못된 링크" icon={<Link2 size={16} />} placeholder="문제 있는 링크를 붙여넣어 주세요." />
@@ -67,7 +75,9 @@ export default function ReportErrorPage() {
           <p className="char-counter">{desc.length} / 500</p>
 
           <div className="report-actions">
-            <Button icon={<Megaphone size={15} />}>정보 오류 신고</Button>
+            <Button icon={<Megaphone size={15} />} disabled title="준비 중인 기능입니다.">
+              정보 오류 신고
+            </Button>
             <Button variant="secondary">취소</Button>
           </div>
         </section>

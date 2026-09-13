@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart2,
   ShieldCheck,
   Building2,
+  Clock,
   Settings,
   LogOut,
   Mountain,
@@ -12,6 +13,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import { useAuth } from "../auth/AuthContext";
 import "./AdminLayout.css";
 
 const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
@@ -19,12 +21,15 @@ const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 const NAV_ITEMS = [
   { label: "방문 인증", to: "/visit-auth", icon: ShieldCheck, match: ["/visit-auth"] },
   { label: "통계 데이터 보드", to: "/stats", icon: BarChart2, match: ["/stats", "/monitoring"] },
-  { label: "장소 관리", to: "/places", icon: Building2, match: ["/places"] },
-  { label: "설정", to: "/settings", icon: Settings, match: ["/settings"] },
+  { label: "장소 관리", to: "/places", icon: Building2, match: ["/places"], exact: true },
+  { label: "운영시간 관리", to: "/places/hours", icon: Clock, match: ["/places/hours"] },
+  { label: "계정 관리", to: "/settings", icon: Settings, match: ["/settings"] },
 ];
 
 export default function AdminLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1"
@@ -38,7 +43,8 @@ export default function AdminLayout() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const isActive = (matchers: string[]) => matchers.some((m) => pathname.startsWith(m));
+  const isActive = (matchers: string[], exact?: boolean) =>
+    matchers.some((m) => (exact ? pathname === m : pathname.startsWith(m)));
 
   return (
     <div className="admin-shell">
@@ -84,11 +90,11 @@ export default function AdminLayout() {
         </div>
 
         <nav className="admin-nav">
-          {NAV_ITEMS.map(({ label, to, icon: Icon, match }) => (
+          {NAV_ITEMS.map(({ label, to, icon: Icon, match, exact }) => (
             <Link
               key={to}
               to={to}
-              className={`admin-nav-item ${isActive(match) ? "active" : ""}`}
+              className={`admin-nav-item ${isActive(match, exact) ? "active" : ""}`}
               title={collapsed ? label : undefined}
               onClick={() => setSidebarOpen(false)}
             >
@@ -100,9 +106,16 @@ export default function AdminLayout() {
 
         <div className="admin-sidebar-illustration" aria-hidden="true" />
 
-        <Link to="/login" className="admin-logout">
+        <button
+          type="button"
+          className="admin-logout"
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+        >
           <LogOut size={18} strokeWidth={2} /> <span className="admin-nav-label">로그아웃</span>
-        </Link>
+        </button>
       </aside>
 
       <main className="admin-content">

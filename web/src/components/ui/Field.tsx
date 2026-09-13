@@ -7,16 +7,17 @@ interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   suffix?: ReactNode;
   hint?: ReactNode;
   error?: string;
+  required?: boolean;
 }
 
-export default function Field({ label, icon, suffix, hint, error, id, ...rest }: FieldProps) {
+export default function Field({ label, icon, suffix, hint, error, required, id, ...rest }: FieldProps) {
   const fieldId = id ?? label;
   const errorId = error ? `${fieldId}-error` : undefined;
 
   return (
     <div className="field">
       <div className="field-label-row">
-        <label htmlFor={fieldId} className="field-label">
+        <label htmlFor={fieldId} className={`field-label ${required ? "required" : ""}`}>
           {label}
         </label>
         {hint}

@@ -92,12 +92,12 @@
 
 .chart-bar {
   width: 100%;
-  max-width: 34px;
+  max-width: 22px;
   border-radius: 0;
 }
 
 .chart-combo-detailed .chart-bar {
-  max-width: 52px;
+  max-width: 28px;
 }
 
 .chart-bar-value {

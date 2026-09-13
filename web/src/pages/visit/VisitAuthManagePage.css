@@ -37,40 +37,121 @@
   color: var(--color-primary);
 }
 
-.visit-status-metrics {
+/* 이 페이지는 팀 요청으로 다른 관리자 화면과 다른 카드형/컬러 스타일을 예외적으로 사용한다. */
+
+.visit-auth-page .page-header {
+  margin-bottom: 6px;
+}
+
+.visit-modal {
+  border-radius: 24px;
+}
+
+.visit-modal .modal-close {
+  border-radius: 999px;
+}
+
+.visit-modal .modal-footer .btn {
+  border-radius: 999px;
+}
+
+.visit-modal .modal-footer .btn-danger:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.visit-stat-cards {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-left: auto;
+  gap: 20px;
+  padding: 14px 24px;
+  background: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
-.visit-status-metric {
-  text-align: right;
+.visit-stat-cards .today-tag {
+  position: absolute;
+  top: -8px;
+  left: 16px;
 }
 
-.visit-status-metric-value {
-  font-size: 19px;
+.visit-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.visit-stat-card-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-border-soft);
+}
+
+.visit-stat-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.visit-stat-card-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.visit-stat-card.tone-success .visit-stat-card-icon {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.visit-stat-card.tone-warning .visit-stat-card-icon {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.visit-stat-card .visit-stat-card-icon.visit-stat-card-icon-plain {
+  background: none;
+}
+
+.today-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 9px;
   font-weight: 700;
-  line-height: 1.1;
+  letter-spacing: 0.4px;
+}
+
+.visit-stat-card-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
-.visit-status-metric-label {
-  margin-top: 3px;
-  font-size: 11px;
+.visit-stat-card-label {
+  margin-top: 2px;
+  font-size: 12px;
   color: var(--color-text-faint);
   white-space: nowrap;
 }
 
-.visit-status-metric.warning .visit-status-metric-value {
-  color: var(--color-warning);
-}
-
-.session-code-cell {
+.session-action-buttons {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .session-confirm-btn {
@@ -78,10 +159,10 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 26px;
-  padding: 0 11px;
+  height: 28px;
+  padding: 0 12px;
   border: none;
-  border-radius: 0;
+  border-radius: 999px;
   background: var(--color-primary);
   color: #fff;
   font-size: 11.5px;
@@ -93,6 +174,17 @@
 .session-confirm-btn:hover {
   background: var(--color-primary-dark);
   box-shadow: 0 2px 7px rgba(89, 102, 68, 0.5);
+}
+
+.session-confirm-btn.danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  box-shadow: none;
+}
+
+.session-confirm-btn.danger:hover {
+  background: var(--color-danger);
+  color: #fff;
 }
 
 .session-toolbar {
@@ -109,14 +201,14 @@
   gap: 4px;
   background: var(--color-surface-alt);
   padding: 3px;
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
 }
 
 .session-filter-tabs button {
   border: none;
   background: none;
   padding: 7px 14px;
-  border-radius: 0;
+  border-radius: 999px;
   font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-soft);
@@ -125,6 +217,77 @@
 .session-filter-tabs button.active {
   background: var(--color-primary);
   color: #fff;
+}
+
+/* 이 페이지는 예외적으로 둥근 카드/알약 스타일을 쓰기로 해서, 이 화면 안에서만
+   공용 뱃지·테이블·페이지네이션 모양을 덮어쓴다(다른 화면에는 영향 없음). */
+.visit-auth-page .badge {
+  border-radius: 999px;
+  padding: 0 12px;
+}
+
+.visit-auth-page .table-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.session-detail-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  white-space: nowrap;
+}
+
+.session-detail-trigger:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.visit-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.visit-pagination-arrow,
+.visit-pagination-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.visit-pagination-arrow:disabled {
+  opacity: 0.4;
+}
+
+.visit-pagination-page.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.visit-pagination-count {
+  margin-left: 10px;
+  font-size: 12px;
+  color: var(--color-text-faint);
 }
 
 .session-search {
@@ -161,35 +324,71 @@
   z-index: 70;
   width: 300px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-pop);
   padding: 16px 18px;
+  animation: session-detail-pop-in 120ms ease-out;
+}
+
+.session-detail-popover::before,
+.session-detail-popover::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  right: 22px;
+  border: 7px solid transparent;
+  border-top-color: var(--color-border);
+  border-bottom: none;
+}
+
+.session-detail-popover::after {
+  bottom: -8px;
+  border-width: 6px;
+  border-top-color: var(--color-surface);
+}
+
+@keyframes session-detail-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .session-detail-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--color-text);
-  margin: 0 0 10px;
+  color: var(--color-primary);
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .session-detail-kv {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .session-detail-kv div {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 12px;
   font-size: 12px;
 }
 
 .session-detail-kv dt {
   color: var(--color-text-faint);
+  white-space: nowrap;
 }
 
 .session-detail-kv dd {
@@ -199,18 +398,20 @@
   text-align: right;
 }
 
+.session-detail-fail-reason dt {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.session-detail-fail-reason dd {
+  line-height: 1.5;
+}
+
 @media (max-width: 700px) {
   .visit-status-bar {
     align-items: flex-start;
   }
   .visit-status-divider {
     display: none;
-  }
-  .visit-status-metrics {
-    margin-left: 0;
-    gap: 18px;
-  }
-  .visit-status-metric {
-    text-align: left;
   }
 }

@@ -1,9 +1,9 @@
 .panel {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 20px;
+  padding: 24px;
 }
 
 .panel-tint {
@@ -24,6 +24,36 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-head-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.card-head-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.card-head-desc {
+  font-size: 12.5px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
 }
 
 .section-label {
@@ -59,6 +89,8 @@
   display: flex;
   align-items: center;
   gap: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .panel-action:hover {
@@ -305,7 +337,7 @@
 .textarea-input:disabled {
   background: var(--color-surface-alt);
   color: var(--color-text-soft);
-  cursor: not-allowed;
+  cursor: default;
 }
 
 .text-input:disabled:hover,

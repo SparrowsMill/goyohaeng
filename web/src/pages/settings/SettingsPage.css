@@ -5,18 +5,6 @@
   margin-bottom: 8px;
 }
 
-.field-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.pw-toggle {
-  position: absolute;
-  right: 12px;
-  color: var(--color-text-faint);
-}
-
 .account-manage-row {
   display: flex;
   flex-direction: column;

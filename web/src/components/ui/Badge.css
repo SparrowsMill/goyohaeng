@@ -35,15 +35,19 @@
   color: var(--color-primary-soft-text);
 }
 
+.badge-accent {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
 .badge-neutral {
   background: var(--color-surface-alt);
   color: var(--color-text-soft);
 }
 
 .badge-pill {
-  height: 32px;
-  padding: 0 16px;
-  font-size: 13px;
-  border: 1px solid currentColor;
-  background: var(--color-surface);
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  border-radius: 999px;
 }
