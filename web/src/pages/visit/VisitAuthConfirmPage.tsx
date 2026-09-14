@@ -14,6 +14,7 @@ import {
   rejectVerification,
   type VisitVerificationDetail,
 } from "../../api/visitVerifications";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "./VisitAuthConfirmPage.css";
 
 function formatDateTime(value: string | null) {
@@ -38,6 +39,7 @@ export default function VisitAuthConfirmPage() {
   const { showToast } = useToast();
   const [detail, setDetail] = useState<VisitVerificationDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const showSkeleton = useDelayedLoading(!detail && !error);
   const [now, setNow] = useState(() => Date.now());
   const [resultOpen, setResultOpen] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -74,6 +76,7 @@ export default function VisitAuthConfirmPage() {
   }
 
   if (!detail) {
+    if (!showSkeleton) return null;
     return (
       <>
         <PageHeader title="방문 인증 상세" />

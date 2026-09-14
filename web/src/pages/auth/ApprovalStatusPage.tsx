@@ -7,6 +7,7 @@ import Skeleton from "../../components/ui/Skeleton";
 import { getApprovalStatus, type ApprovalStatusResponse } from "../../api/auth";
 import { useAuth } from "../../auth/AuthContext";
 import { ApiError } from "../../api/client";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "./AuthForm.css";
 
 export default function ApprovalStatusPage() {
@@ -14,6 +15,7 @@ export default function ApprovalStatusPage() {
   const { setBusinessAccount, logout } = useAuth();
   const [data, setData] = useState<ApprovalStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const showSkeleton = useDelayedLoading(!data && !error);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +58,7 @@ export default function ApprovalStatusPage() {
   }
 
   if (!data) {
+    if (!showSkeleton) return null;
     return (
       <>
         <AuthHeader title="승인 상태 확인 중" subtitle="잠시만 기다려주세요." />

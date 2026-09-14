@@ -18,6 +18,7 @@ import Field from "../../components/ui/Field";
 import Modal from "../../components/ui/Modal";
 import Skeleton from "../../components/ui/Skeleton";
 import { useToast } from "../../components/ui/Toast";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import { ApiError } from "../../api/client";
 import { changePassword, deleteMyAccount, getMyAccount, type MyAccount } from "../../api/auth";
 import { useAuth } from "../../auth/AuthContext";
@@ -28,6 +29,7 @@ export default function SettingsPage() {
   const { logout } = useAuth();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedLoading(loading);
   const [account, setAccount] = useState<MyAccount | null>(null);
   const [showPw, setShowPw] = useState(false);
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
@@ -83,6 +85,7 @@ export default function SettingsPage() {
   };
 
   if (loading) {
+    if (!showSkeleton) return null;
     return (
       <div className="settings-page">
         <PageHeader

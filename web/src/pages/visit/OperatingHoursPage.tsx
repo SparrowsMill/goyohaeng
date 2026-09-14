@@ -8,6 +8,7 @@ import EmptyState from "../../components/ui/EmptyState";
 import Modal from "../../components/ui/Modal";
 import Skeleton from "../../components/ui/Skeleton";
 import { useToast } from "../../components/ui/Toast";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import { ApiError } from "../../api/client";
 import {
   createTemporaryClosure,
@@ -88,6 +89,7 @@ export default function OperatingHoursPage() {
   const { showToast } = useToast();
 
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedLoading(loading);
   const [hours, setHours] = useState<OperatingHourItem[]>(defaultOperatingHours());
   const [savingHours, setSavingHours] = useState(false);
 
@@ -208,15 +210,22 @@ export default function OperatingHoursPage() {
       showToast("날짜를 입력해주세요.", "info");
       return;
     }
+    // upsertSpecialHour는 targetDate를 키로 upsert하기 때문에, 수정 중 날짜 자체를
+    // 바꾼 경우 새 날짜에 새로 만들어주고 예전 날짜의 일정은 따로 지워줘야 한다.
+    const dateChanged = !!editingDate && editingDate !== form.targetDate;
     try {
-      const res = await upsertSpecialHour({
+      await upsertSpecialHour({
         targetDate: form.targetDate,
         scheduleType: form.scheduleType,
         openTime: form.scheduleType === "SPECIAL_OPEN" ? form.openTime : null,
         closeTime: form.scheduleType === "SPECIAL_OPEN" ? form.closeTime : null,
         reason: form.reason.trim() || null,
       });
-      setSpecialHours(res.specialHours);
+      if (dateChanged) {
+        await deleteSpecialHour(editingDate);
+      }
+      const refreshed = await getSpecialHours();
+      setSpecialHours(refreshed.specialHours);
       showToast(editingDate ? "특별운영 일정이 수정되었습니다." : "특별운영 일정이 추가되었습니다.", "success");
       setScheduleModalOpen(false);
     } catch (err) {
@@ -256,6 +265,7 @@ export default function OperatingHoursPage() {
   };
 
   if (loading) {
+    if (!showSkeleton) return null;
     return (
       <>
         <PageHeader
@@ -270,7 +280,7 @@ export default function OperatingHoursPage() {
   }
 
   return (
-    <>
+    <div className="operating-hours-page">
       <PageHeader
         title="운영시간 관리"
         icon={<img src="/assets/운영 시간.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
@@ -293,13 +303,12 @@ export default function OperatingHoursPage() {
                   <tr>
                     <th>요일</th>
                     <th>운영</th>
-                    <th>오픈</th>
-                    <th>마감</th>
+                    <th>운영 시간</th>
                   </tr>
                 </thead>
                 <tbody>
                   {hours.map((h) => (
-                    <tr key={h.dayOfWeek}>
+                    <tr key={h.dayOfWeek} className={h.isClosed ? "hours-row-closed" : ""}>
                       <td className="hours-table-day">{DAY_LABEL[h.dayOfWeek]}</td>
                       <td>
                         <Toggle
@@ -309,22 +318,21 @@ export default function OperatingHoursPage() {
                         />
                       </td>
                       <td>
-                        <input
-                          type="time"
-                          className="text-input hours-time-input"
-                          disabled={h.isClosed}
-                          value={h.openTime ?? ""}
-                          onChange={(e) => updateDayField(h.dayOfWeek, { openTime: e.target.value })}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="time"
-                          className="text-input hours-time-input"
-                          disabled={h.isClosed}
-                          value={h.closeTime ?? ""}
-                          onChange={(e) => updateDayField(h.dayOfWeek, { closeTime: e.target.value })}
-                        />
+                        <div className="time-range">
+                          <input
+                            type="time"
+                            disabled={h.isClosed}
+                            value={h.openTime ?? ""}
+                            onChange={(e) => updateDayField(h.dayOfWeek, { openTime: e.target.value })}
+                          />
+                          <span className="time-range-sep">~</span>
+                          <input
+                            type="time"
+                            disabled={h.isClosed}
+                            value={h.closeTime ?? ""}
+                            onChange={(e) => updateDayField(h.dayOfWeek, { closeTime: e.target.value })}
+                          />
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -400,13 +408,12 @@ export default function OperatingHoursPage() {
                     <tr>
                       <th>요일</th>
                       <th>사용 여부</th>
-                      <th>시작 시간</th>
-                      <th>종료 시간</th>
+                      <th>인증 가능 시간</th>
                     </tr>
                   </thead>
                   <tbody>
                     {verificationHours.map((h) => (
-                      <tr key={h.dayOfWeek}>
+                      <tr key={h.dayOfWeek} className={!h.enabled ? "hours-row-closed" : ""}>
                         <td className="hours-table-day">{DAY_LABEL[h.dayOfWeek]}</td>
                         <td>
                           <Toggle
@@ -416,22 +423,21 @@ export default function OperatingHoursPage() {
                           />
                         </td>
                         <td>
-                          <input
-                            type="time"
-                            className="text-input hours-time-input"
-                            disabled={!h.enabled}
-                            value={h.startTime ?? ""}
-                            onChange={(e) => updateVerificationDay(h.dayOfWeek, { startTime: e.target.value })}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="time"
-                            className="text-input hours-time-input"
-                            disabled={!h.enabled}
-                            value={h.endTime ?? ""}
-                            onChange={(e) => updateVerificationDay(h.dayOfWeek, { endTime: e.target.value })}
-                          />
+                          <div className="time-range">
+                            <input
+                              type="time"
+                              disabled={!h.enabled}
+                              value={h.startTime ?? ""}
+                              onChange={(e) => updateVerificationDay(h.dayOfWeek, { startTime: e.target.value })}
+                            />
+                            <span className="time-range-sep">~</span>
+                            <input
+                              type="time"
+                              disabled={!h.enabled}
+                              value={h.endTime ?? ""}
+                              onChange={(e) => updateVerificationDay(h.dayOfWeek, { endTime: e.target.value })}
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -461,17 +467,15 @@ export default function OperatingHoursPage() {
               <span>브레이크타임 사용</span>
               <Toggle checked={breakEnabled} onChange={(on) => applyBreakToAllDays({ enabled: on })} size="sm" />
             </div>
-            <div className="break-time-inputs">
+            <div className="time-range">
               <input
-                className="text-input"
                 type="time"
                 disabled={!breakEnabled}
                 value={breakRange.start}
                 onChange={(e) => applyBreakToAllDays({ start: e.target.value })}
               />
-              <span>~</span>
+              <span className="time-range-sep">~</span>
               <input
-                className="text-input"
                 type="time"
                 disabled={!breakEnabled}
                 value={breakRange.end}
@@ -491,16 +495,14 @@ export default function OperatingHoursPage() {
 
             <div className="form-row">
               <label>임시휴무 기간</label>
-              <div className="break-time-inputs">
+              <div className="time-range">
                 <input
-                  className="text-input"
                   type="date"
                   value={closureRange.startDate}
                   onChange={(e) => setClosureRange((c) => ({ ...c, startDate: e.target.value }))}
                 />
-                <span>~</span>
+                <span className="time-range-sep">~</span>
                 <input
-                  className="text-input"
                   type="date"
                   value={closureRange.endDate}
                   onChange={(e) => setClosureRange((c) => ({ ...c, endDate: e.target.value }))}
@@ -597,7 +599,6 @@ export default function OperatingHoursPage() {
               className="text-input"
               type="date"
               value={form.targetDate}
-              disabled={!!editingDate}
               onChange={(e) => setForm((f) => ({ ...f, targetDate: e.target.value }))}
             />
           </div>
@@ -613,16 +614,14 @@ export default function OperatingHoursPage() {
             </select>
           </div>
           {form.scheduleType === "SPECIAL_OPEN" && (
-            <div className="break-time-inputs">
+            <div className="time-range">
               <input
-                className="text-input"
                 type="time"
                 value={form.openTime}
                 onChange={(e) => setForm((f) => ({ ...f, openTime: e.target.value }))}
               />
-              <span>~</span>
+              <span className="time-range-sep">~</span>
               <input
-                className="text-input"
                 type="time"
                 value={form.closeTime}
                 onChange={(e) => setForm((f) => ({ ...f, closeTime: e.target.value }))}
@@ -657,6 +656,6 @@ export default function OperatingHoursPage() {
           </>
         }
       />
-    </>
+    </div>
   );
 }

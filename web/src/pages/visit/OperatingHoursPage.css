@@ -14,7 +14,7 @@
 }
 
 .hours-table td {
-  padding: 6px;
+  padding: 8px 6px;
   border-bottom: 1px solid var(--color-border-soft);
 }
 
@@ -22,8 +22,21 @@
   border-bottom: none;
 }
 
+.hours-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+.hours-table tbody tr:hover {
+  background: var(--color-bg-soft);
+}
+
 .hours-table-day {
   white-space: nowrap;
+  font-weight: 600;
+}
+
+.hours-table tr.hours-row-closed {
+  opacity: 0.55;
 }
 
 .hours-summary-td {
@@ -37,13 +50,6 @@
   font-size: 11px;
 }
 
-.hours-time-input {
-  height: 30px;
-  max-width: 130px;
-  padding: 0 8px;
-  font-size: 12px;
-}
-
 input[type="time"] {
   width: auto;
 }
@@ -55,6 +61,70 @@ input[type="time"]::-webkit-datetime-edit {
 input[type="time"]::-webkit-calendar-picker-indicator {
   margin-left: 4px;
   padding: 0;
+}
+
+/* A pair of time/date inputs presented as one grouped, pill-shaped control
+   instead of two separate bordered boxes side by side. */
+.time-range {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #dcdcda;
+  background: #f0f0ee;
+  color: var(--color-text-faint);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+body[data-theme="dark"] .time-range {
+  border-color: #4c4c48;
+  background: #3c3c39;
+}
+
+.time-range:hover {
+  border-color: #c8c8c5;
+}
+
+body[data-theme="dark"] .time-range:hover {
+  border-color: #5a5a55;
+}
+
+.time-range:focus-within {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.time-range input {
+  border: none;
+  background: transparent;
+  padding: 0;
+  height: auto;
+  width: auto;
+  font-size: 12.5px;
+  color: var(--color-text);
+}
+
+.time-range input[type="date"] {
+  max-width: 108px;
+}
+
+.time-range input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.time-range input:disabled {
+  background: transparent;
+  color: var(--color-text-faint);
+}
+
+.time-range-sep {
+  font-size: 11px;
+  line-height: 1;
 }
 
 .hours-fill-panel {
@@ -89,21 +159,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   margin-bottom: 12px;
 }
 
-.break-time-inputs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-text-faint);
-}
-
-.break-time-inputs .text-input {
-  flex: 1;
-}
-
-.break-time-inputs input[type="time"] {
-  flex: none;
-}
-
 .special-schedule-list {
   list-style: none;
   margin: 0;
@@ -117,9 +172,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border-radius: 14px;
   border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
 }
 
 .special-schedule-list li > div:first-child {
@@ -153,37 +209,43 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .special-schedule-actions button {
   width: 28px;
   height: 28px;
-  border-radius: 0;
+  border-radius: 999px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-soft);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .special-schedule-actions button:hover {
   background: var(--color-surface-alt);
+  border-color: var(--color-text-faint);
+  color: var(--color-text);
 }
 
 .radio-options {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .radio-option {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
+  gap: 7px;
+  width: fit-content;
+  padding: 7px 12px;
   border: 1px solid var(--color-border-soft);
-  border-radius: 10px;
+  border-radius: 999px;
   font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-soft);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .radio-option:hover {
@@ -192,8 +254,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .radio-option:has(input:checked) {
   border-color: var(--color-primary);
-  background: var(--color-primary-soft);
-  color: var(--color-primary-soft-text);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  color: var(--color-text);
 }
 
 .radio-option input[type="radio"] {
@@ -222,4 +284,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   inset: 3px;
   border-radius: 50%;
   background: var(--color-primary);
+}
+
+.operating-hours-page .textarea-input {
+  border-radius: 14px;
 }

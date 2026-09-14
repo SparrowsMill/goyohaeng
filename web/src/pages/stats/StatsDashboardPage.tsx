@@ -17,13 +17,23 @@ import {
   LogIn,
 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
-import Badge from "../../components/ui/Badge";
+import Badge, { type BadgeTone } from "../../components/ui/Badge";
 import ComboChart from "../../components/charts/ComboChart";
 import Skeleton from "../../components/ui/Skeleton";
+import EmptyState from "../../components/ui/EmptyState";
 import { useToast } from "../../components/ui/Toast";
 import { ApiError } from "../../api/client";
 import { getVisitVerifications, type VisitVerificationListItem } from "../../api/visitVerifications";
 import { getPageFunnel, type PageFunnel } from "../../api/analytics";
+import {
+  getPlaceGapHistory,
+  getPlaceGapScore,
+  type GapHistoryPeriod,
+  type PlaceGapHistory,
+  type PlaceGapScore,
+} from "../../api/place";
+import { useAuth } from "../../auth/AuthContext";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import type { VerificationStatus } from "../../api/dashboard";
 import "./StatsDashboardPage.css";
 
@@ -47,6 +57,10 @@ function daysAgoDate(n: number) {
 
 function dayLabel(d: Date) {
   return `${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatGapDate(value: string) {
+  return new Date(value).toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" });
 }
 
 function bucketByDay(items: { dateValue: string }[], days: { date: string; label: string }[]): DayBucket[] {
@@ -130,39 +144,27 @@ function sum(buckets: DayBucket[]) {
   return buckets.reduce((total, b) => total + b.count, 0);
 }
 
-// GAP Score 관련 수치는 백엔드에 아직 계산/조회 API가 없어(스펙 20장 참고) 목업으로 유지한다.
-const gapTrendByPeriod = {
-  "7d": [
-    { label: "05/14\n(수)", value: 58 },
-    { label: "05/15\n(목)", value: 61 },
-    { label: "05/16\n(금)", value: 64 },
-    { label: "05/17\n(토)", value: 67 },
-    { label: "05/18\n(일)", value: 69 },
-    { label: "05/19\n(월)", value: 72 },
-    { label: "05/20\n(화)", value: 72 },
-  ],
-  "1m": [
-    { label: "08/25-08/31", value: 52 },
-    { label: "09/01-09/07", value: 58 },
-    { label: "09/08-09/14", value: 63 },
-    { label: "09/15-09/21", value: 72 },
-  ],
-  "3m": [
-    { label: "3월", value: 45 },
-    { label: "4월", value: 61 },
-    { label: "5월", value: 72 },
-  ],
-};
-
 const keywords = ["한옥마을", "전주여행", "전통체험", "비빔밥", "한복체험", "야경명소", "로컬맛집", "고즈넉한"];
 
 const MAX_WEEK_OFFSET = TREND_DAYS / 7 - 1;
 
+// 백엔드에 등급 기준이 따로 없어서 프론트에서 임의로 나눈 구간이다.
+// 실제 기준이 정해지면 여기만 바꾸면 된다.
+function gapScoreGrade(score: number): { label: string; tone: BadgeTone } {
+  if (score >= 60) return { label: "양호", tone: "success" };
+  if (score >= 40) return { label: "보통", tone: "warning" };
+  return { label: "주의", tone: "danger" };
+}
+
 export default function StatsDashboardPage() {
   const { showToast } = useToast();
-  const [period, setPeriod] = useState<"7d" | "1m" | "3m">("7d");
+  const { businessAccount } = useAuth();
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedLoading(loading);
   const [pageFunnel, setPageFunnel] = useState<PageFunnel | null>(null);
+  const [gapScore, setGapScore] = useState<PlaceGapScore | null>(null);
+  const [gapPeriod, setGapPeriod] = useState<GapHistoryPeriod>("7d");
+  const [gapHistory, setGapHistory] = useState<PlaceGapHistory | null>(null);
   const [trend, setTrend] = useState<TrendSeries | null>(null);
   const [weekOffset, setWeekOffset] = useState<Record<keyof TrendSeries, number>>({
     verifiedDaily: 0,
@@ -170,16 +172,27 @@ export default function StatsDashboardPage() {
     failDaily: 0,
   });
 
+  const placeId = businessAccount?.place?.id;
+
   useEffect(() => {
-    Promise.all([getPageFunnel(), loadTrendSeries()])
-      .then(([pageFunnelRes, trendRes]) => {
+    Promise.all([getPageFunnel(), loadTrendSeries(), placeId ? getPlaceGapScore(placeId) : Promise.resolve(null)])
+      .then(([pageFunnelRes, trendRes, gapScoreRes]) => {
         setPageFunnel(pageFunnelRes);
         setTrend(trendRes);
+        setGapScore(gapScoreRes);
       })
       .catch((err) => showToast(err instanceof ApiError ? err.message : "통계를 불러오지 못했습니다.", "error"))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [placeId]);
+
+  useEffect(() => {
+    if (!placeId) return;
+    getPlaceGapHistory(placeId, gapPeriod)
+      .then(setGapHistory)
+      .catch((err) => showToast(err instanceof ApiError ? err.message : "고요지수 추세를 불러오지 못했습니다.", "error"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeId, gapPeriod]);
 
   const weekWindow = (key: keyof TrendSeries) => {
     const daily = trend?.[key] ?? [];
@@ -197,9 +210,8 @@ export default function StatsDashboardPage() {
   const revisit7 = weekWindow("revisitDaily");
   const fail7 = weekWindow("failDaily");
 
-  const gapTrend = gapTrendByPeriod[period];
-
   if (loading) {
+    if (!showSkeleton) return null;
     return (
       <div className="stats-page">
         <PageHeader
@@ -213,7 +225,8 @@ export default function StatsDashboardPage() {
     );
   }
 
-  const gapDelta = gapTrend[gapTrend.length - 1].value - gapTrend[0].value;
+  const gapReady = gapScore && gapScore.available ? gapScore : null;
+  const grade = gapReady ? gapScoreGrade(gapReady.gapScore) : null;
 
   return (
     <div className="stats-page">
@@ -235,20 +248,31 @@ export default function StatsDashboardPage() {
         <section className="panel gap-score-panel">
           <p className="panel-title">
             <Award size={15} className="gap-score-title-icon" />
-            현재 GAP Score{" "}
-            <span title="같은 시군구·같은 고요행 카테고리 장소들과 비교해, 온라인 관심도 대비 지역 오프라인 활동도가 얼마나 낮은지로 산출한 지표예요. (백엔드 산출 API 준비 중 — 목업 표시)">
-              <Info size={12} className="info-icon" />
-            </span>
+            현재 고요지수
           </p>
-          <p className="gap-score-value">72</p>
-          <Badge tone="success">양호</Badge>
-          <p className="gap-score-compare">
-            <TrendingUp size={12} />
-            같은 시군구·카테고리 평균(57) 대비 <strong>+15</strong>
-          </p>
-          <p className="gap-score-caption">
-            <Calendar size={11} /> 목업 데이터
-          </p>
+          {gapReady ? (
+            <>
+              <p className="gap-score-value">{Math.round(gapReady.gapScore)}</p>
+              {grade && <Badge tone={grade.tone}>{grade.label}</Badge>}
+              {gapReady.regionCategoryAverageGapScore !== null && (
+                <p className="gap-score-compare">
+                  <TrendingUp size={12} />
+                  같은 시군구·카테고리 평균({Math.round(gapReady.regionCategoryAverageGapScore)}) 대비{" "}
+                  <strong>
+                    {gapReady.gapScore - gapReady.regionCategoryAverageGapScore >= 0 ? "+" : ""}
+                    {Math.round(gapReady.gapScore - gapReady.regionCategoryAverageGapScore)}
+                  </strong>
+                </p>
+              )}
+              <p className="gap-score-caption">
+                <Calendar size={11} /> {formatGapDate(gapReady.calculatedAt)} 산출
+              </p>
+            </>
+          ) : (
+            <p className="gap-basis-desc" style={{ marginTop: 8 }}>
+              아직 산출된 고요지수가 없어요.
+            </p>
+          )}
         </section>
 
         <section className="panel">
@@ -256,99 +280,125 @@ export default function StatsDashboardPage() {
             산출 근거
           </p>
           <p className="gap-basis-desc">
-            온라인 관심도가 지역의 실제 오프라인 관광 활동보다 얼마나 앞서는지를 나타내요. 격차가 클수록 온라인 관심 대비 방문이 저조하다는 뜻이에요.
+            검색은 많이 되지만 실제 방문은 아직 적은 곳을 찾아내는 지표예요. 관심은 큰데 방문이 적을수록 고요지수가 커져요.
           </p>
 
-          <div className="gap-metric">
-            <div className="gap-metric-label">
-              <span className="gap-metric-label-text">
-                온라인 관심도
-                <span title="장소 자체 검색 관심(60%), 지역·카테고리 SNS 수요(20%), 내비게이션 검색 수요(20%)를 합산한 지수예요.">
-                  <Info size={11} className="info-icon" />
-                </span>
-              </span>
-              <span>68</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: "68%" }} />
-            </div>
-          </div>
+          {gapReady ? (
+            <>
+              <div className="gap-metric">
+                <div className="gap-metric-label">
+                  <span className="gap-metric-label-text">
+                    온라인 관심도
+                    <span title="장소 자체 검색 관심(60%), 지역·카테고리 SNS 수요(20%), 내비게이션 검색 수요(20%)를 합산한 지수예요.">
+                      <Info size={11} className="info-icon" />
+                    </span>
+                  </span>
+                  <span>{gapReady.onlineScore ?? "-"}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${gapReady.onlineScore ?? 0}%` }} />
+                </div>
+              </div>
 
-          <div className="gap-metric gap-metric-sub">
-            <div className="gap-metric-label">
-              <span className="gap-metric-label-text">네이버 검색 관심 (60%)</span>
-              <span>68</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: "68%" }} />
-            </div>
-          </div>
-          <div className="gap-metric gap-metric-sub">
-            <div className="gap-metric-label">
-              <span className="gap-metric-label-text">SNS 수요 (20%)</span>
-              <span>74</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: "74%" }} />
-            </div>
-          </div>
-          <div className="gap-metric gap-metric-sub">
-            <div className="gap-metric-label">
-              <span className="gap-metric-label-text">내비게이션 검색 수요 (20%)</span>
-              <span>61</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: "61%" }} />
-            </div>
-          </div>
+              <div className="gap-metric gap-metric-sub">
+                <div className="gap-metric-label">
+                  <span className="gap-metric-label-text">네이버 검색 관심 (60%)</span>
+                  <span>{gapReady.percentiles.naver ?? "-"}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${gapReady.percentiles.naver ?? 0}%` }} />
+                </div>
+              </div>
+              <div className="gap-metric gap-metric-sub">
+                <div className="gap-metric-label">
+                  <span className="gap-metric-label-text">SNS 수요 (20%)</span>
+                  <span>{gapReady.percentiles.sns ?? "-"}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${gapReady.percentiles.sns ?? 0}%` }} />
+                </div>
+              </div>
+              <div className="gap-metric gap-metric-sub">
+                <div className="gap-metric-label">
+                  <span className="gap-metric-label-text">내비게이션 검색 수요 (20%)</span>
+                  <span>{gapReady.percentiles.navigation ?? "-"}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${gapReady.percentiles.navigation ?? 0}%` }} />
+                </div>
+              </div>
 
-          <div className="gap-metric" style={{ marginTop: 12 }}>
-            <div className="gap-metric-label">
-              <span className="gap-metric-label-text">
-                지역 오프라인 활동도
-                <span title="우리 가게 방문인증 실적이 아니라, 같은 시군구의 외지인·외국인 방문량(60%), 관광 소비강도(25%), 타권역 방문자 비중(15%)을 합산한 지역 단위 지수예요.">
-                  <Info size={11} className="info-icon" />
-                </span>
-              </span>
-              <span>76</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: "76%" }} />
-            </div>
-            <div className="progress-range">
-              <span>0</span>
-              <span>100</span>
-            </div>
-          </div>
+              <div className="gap-metric" style={{ marginTop: 12 }}>
+                <div className="gap-metric-label">
+                  <span className="gap-metric-label-text">지역 오프라인 활동도</span>
+                  <span>{gapReady.offlineScore ?? "-"}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${gapReady.offlineScore ?? 0}%` }} />
+                </div>
+                <div className="progress-range">
+                  <span>0</span>
+                  <span>100</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="gap-basis-desc" style={{ marginTop: 8 }}>
+              장소에 대한 고요지수가 산출되면 세부 내역이 여기 표시돼요.
+            </p>
+          )}
         </section>
 
         <section className="panel">
           <div className="panel-header">
-            <p className="panel-title">GAP Score 추세</p>
+            <p className="panel-title">고요지수 추세</p>
             <div className="period-tabs">
-              {[
-                { key: "7d", label: "최근 7일" },
-                { key: "1m", label: "1개월" },
-                { key: "3m", label: "3개월" },
-              ].map((t) => (
+              {(
+                [
+                  { key: "7d", label: "최근 7일" },
+                  { key: "1m", label: "1개월" },
+                  { key: "3m", label: "3개월" },
+                ] as const
+              ).map((t) => (
                 <button
                   key={t.key}
-                  className={period === t.key ? "active" : ""}
-                  onClick={() => setPeriod(t.key as typeof period)}
+                  className={gapPeriod === t.key ? "active" : ""}
+                  onClick={() => setGapPeriod(t.key)}
                 >
                   {t.label}
                 </button>
               ))}
             </div>
           </div>
-          <div className="gap-trend-chart-wrap">
-            <span className={`gap-trend-delta-badge ${gapDelta >= 0 ? "up" : "down"}`}>
-              {gapDelta >= 0 ? "+" : ""}
-              {gapDelta}
-              <TrendingUp size={12} />
-            </span>
-            <ComboChart data={gapTrend.map((d) => ({ label: d.label, line: d.value }))} detailed area height={150} />
-          </div>
+          {gapHistory && gapHistory.items.length > 0 ? (
+            <div className="gap-trend-chart-wrap">
+              {gapHistory.items.length > 1 &&
+                (() => {
+                  const gapDelta = Math.round(
+                    gapHistory.items[gapHistory.items.length - 1].gapScore - gapHistory.items[0].gapScore
+                  );
+                  return (
+                    <span className={`gap-trend-delta-badge ${gapDelta >= 0 ? "up" : "down"}`}>
+                      {gapDelta >= 0 ? "+" : ""}
+                      {gapDelta}
+                      <TrendingUp size={12} />
+                    </span>
+                  );
+                })()}
+              <ComboChart
+                data={gapHistory.items.map((d) => ({ label: formatGapDate(d.calculatedAt), line: d.gapScore }))}
+                detailed
+                area
+                height={150}
+              />
+            </div>
+          ) : (
+            <EmptyState
+              icon={<TrendingUp size={18} />}
+              title="이 기간엔 산출된 고요지수가 없어요"
+              description="고요지수가 계산되는 대로 이 그래프에 자동으로 표시돼요."
+            />
+          )}
         </section>
       </div>
 

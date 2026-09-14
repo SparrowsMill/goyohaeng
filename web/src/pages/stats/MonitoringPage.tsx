@@ -6,6 +6,7 @@ import ComboChart from "../../components/charts/ComboChart";
 import Skeleton from "../../components/ui/Skeleton";
 import EmptyState from "../../components/ui/EmptyState";
 import { useToast } from "../../components/ui/Toast";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import { ApiError } from "../../api/client";
 import { getNaverAnalytics, type NaverAnalytics } from "../../api/analytics";
 import "./MonitoringPage.css";
@@ -49,6 +50,7 @@ export default function MonitoringPage() {
   const { showToast } = useToast();
   const [naver, setNaver] = useState<NaverAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedLoading(loading);
 
   useEffect(() => {
     getNaverAnalytics()
@@ -71,7 +73,7 @@ export default function MonitoringPage() {
           <Search size={15} /> 네이버 검색 관심도
         </p>
         {loading ? (
-          <Skeleton height={100} />
+          showSkeleton ? <Skeleton height={100} /> : null
         ) : !naver || !naver.available ? (
           <EmptyState icon={<Search size={18} />} title="아직 집계된 검색 관심도 데이터가 없습니다." />
         ) : (

@@ -18,6 +18,7 @@ import Button from "../../components/ui/Button";
 import Field from "../../components/ui/Field";
 import Skeleton from "../../components/ui/Skeleton";
 import { useToast } from "../../components/ui/Toast";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import { ApiError } from "../../api/client";
 import {
   createBenefit,
@@ -38,6 +39,7 @@ import "./PlaceManagePage.css";
 export default function PlaceManagePage() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
+  const showSkeleton = useDelayedLoading(loading);
   const [place, setPlace] = useState<PlaceDetail | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", homepage: "", overview: "" });
   const [saving, setSaving] = useState(false);
@@ -159,6 +161,7 @@ export default function PlaceManagePage() {
   };
 
   if (loading) {
+    if (!showSkeleton) return null;
     return (
       <div className="place-page">
         <PageHeader
@@ -181,7 +184,8 @@ export default function PlaceManagePage() {
         hideSettings
       />
 
-      <section className="place-card">
+      <div className="stack">
+      <section className="panel place-card">
         <div className="card-head" style={{ marginBottom: 20 }}>
           <span className="card-head-icon">
             <Store size={18} />
@@ -302,45 +306,47 @@ export default function PlaceManagePage() {
           </div>
         </div>
 
-        <div className="place-benefit-section">
-          <div className="card-head" style={{ marginBottom: 16 }}>
-            <span className="card-head-icon">
-              <Gift size={18} />
-            </span>
-            <div>
-              <p className="card-head-title">방문 혜택</p>
-              <p className="card-head-desc">해당 장소에서 제공하는 혜택을 등록해주세요.</p>
-            </div>
-          </div>
-          <ul className="place-benefit-list">
-            {benefits.map((b) => (
-              <li key={b.id}>
-                <span className="place-benefit-icon">
-                  <Check size={13} />
-                </span>
-                <input
-                  className="place-benefit-input"
-                  value={b.title}
-                  placeholder="혜택 내용을 입력하세요"
-                  onChange={(e) => updateBenefitTitle(b.id, e.target.value)}
-                  onBlur={(e) => commitBenefitTitle(b.id, e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="place-benefit-remove"
-                  aria-label="혜택 삭제"
-                  onClick={() => removeBenefit(b.id)}
-                >
-                  <X size={13} />
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button type="button" className="place-benefit-add" onClick={addBenefit}>
-            <Plus size={13} /> 혜택 추가
-          </button>
-        </div>
       </section>
+
+      <section className="panel place-card">
+        <div className="card-head" style={{ marginBottom: 16 }}>
+          <span className="card-head-icon">
+            <Gift size={18} />
+          </span>
+          <div>
+            <p className="card-head-title">방문 혜택</p>
+            <p className="card-head-desc">해당 장소에서 제공하는 혜택을 등록해주세요.</p>
+          </div>
+        </div>
+        <ul className="place-benefit-list">
+          {benefits.map((b) => (
+            <li key={b.id}>
+              <span className="place-benefit-icon">
+                <Check size={13} />
+              </span>
+              <input
+                className="place-benefit-input"
+                value={b.title}
+                placeholder="혜택 내용을 입력하세요"
+                onChange={(e) => updateBenefitTitle(b.id, e.target.value)}
+                onBlur={(e) => commitBenefitTitle(b.id, e.target.value)}
+              />
+              <button
+                type="button"
+                className="place-benefit-remove"
+                aria-label="혜택 삭제"
+                onClick={() => removeBenefit(b.id)}
+              >
+                <X size={13} />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <Button type="button" icon={<Plus size={14} />} onClick={addBenefit} style={{ marginTop: 16 }}>
+          혜택 추가
+        </Button>
+      </section>
+      </div>
 
       <div className="place-footer">
         <div className="report-actions">

@@ -1,11 +1,16 @@
-.place-card {
-  padding: 0;
+.place-page .field-input,
+.place-page .text-input {
+  border-radius: 12px;
 }
 
-.place-card + .place-card {
-  margin-top: 48px;
-  padding-top: 40px;
-  border-top: 1px solid var(--color-border-soft);
+.place-page .field-input:disabled {
+  background: #f0f0ee;
+  border-color: #dcdcda;
+}
+
+body[data-theme="dark"] .place-page .field-input:disabled {
+  background: #3c3c39;
+  border-color: #4c4c48;
 }
 
 .place-basic-layout {
@@ -31,15 +36,20 @@
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: var(--radius-md);
+  border-radius: 16px;
   overflow: hidden;
   background: url("/images/login_bg.png") 2% 68% / 220% no-repeat, var(--color-surface-alt);
   margin-top: 6px;
 }
 
 .place-photo-hero:has(.place-photo-empty) {
-  background: var(--color-surface-alt);
-  border: 1.5px dashed var(--color-border);
+  background: #f0f0ee;
+  border: 1.5px dashed #dcdcda;
+}
+
+body[data-theme="dark"] .place-photo-hero:has(.place-photo-empty) {
+  background: #3c3c39;
+  border-color: #4c4c48;
 }
 
 .place-photo-hero::after {
@@ -139,12 +149,6 @@
   min-width: 0;
 }
 
-.place-benefit-section {
-  margin-top: 32px;
-  padding-top: 28px;
-  border-top: 1px solid var(--color-border-soft);
-}
-
 .place-benefit-list {
   list-style: none;
   margin: 0;
@@ -215,25 +219,6 @@
 .place-benefit-remove:hover {
   color: var(--color-danger);
   background: var(--color-danger-soft);
-}
-
-.place-benefit-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-alt);
-  color: var(--color-text);
-  font-size: 12.5px;
-  font-weight: 600;
-}
-
-.place-benefit-add:hover {
-  background: var(--color-bg-soft);
 }
 
 .place-footer {

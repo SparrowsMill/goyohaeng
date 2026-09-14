@@ -30,6 +30,57 @@ export function getPlace() {
   return apiRequest<PlaceDetail>("/business/place");
 }
 
+export interface GapScorePercentiles {
+  naver: number | null;
+  sns: number | null;
+  navigation: number | null;
+  visitor: number | null;
+  expenditure: number | null;
+  nonlocalVisitor: number | null;
+}
+
+export type PlaceGapScore =
+  | {
+      placeId: number;
+      placeName: string;
+      available: false;
+      gapScore: null;
+      regionCategoryAverageGapScore: number | null;
+    }
+  | {
+      placeId: number;
+      placeName: string;
+      available: true;
+      gapScore: number;
+      regionCategoryAverageGapScore: number | null;
+      onlineScore: number | null;
+      offlineScore: number | null;
+      percentiles: GapScorePercentiles;
+      calculatedAt: string;
+    };
+
+// 공개 API (인증 불필요) — 장소 상세페이지에서도 쓰는 것과 동일한 엔드포인트.
+export function getPlaceGapScore(placeId: number) {
+  return apiRequest<PlaceGapScore>(`/places/${placeId}/gap`);
+}
+
+export type GapHistoryPeriod = "7d" | "1m" | "3m";
+
+export interface GapHistoryPoint {
+  calculatedAt: string;
+  gapScore: number;
+}
+
+export interface PlaceGapHistory {
+  placeId: number;
+  period: GapHistoryPeriod;
+  items: GapHistoryPoint[];
+}
+
+export function getPlaceGapHistory(placeId: number, period: GapHistoryPeriod) {
+  return apiRequest<PlaceGapHistory>(`/places/${placeId}/gap/history`, { query: { period } });
+}
+
 export interface UpdatePlacePayload {
   name?: string;
   phone?: string | null;
