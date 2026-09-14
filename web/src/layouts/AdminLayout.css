@@ -117,22 +117,54 @@
   background: var(--color-primary);
 }
 
+.admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-soft);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-theme-toggle:hover {
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+}
+
 .admin-sidebar-illustration {
   flex: 1;
   margin: 20px -16px 0;
   background: url("/assets/start_bg.png") 85% bottom / 600px auto no-repeat;
 }
 
+.admin-sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
 .admin-logout {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
-  margin-top: 14px;
-  padding: 10px 12px;
+  min-width: 0;
+  margin-left: 6px;
+  padding: 4px 0;
   background: none;
   border: none;
-  border-top: 1px solid var(--color-border-soft);
   color: var(--color-text-faint);
   font-family: inherit;
   font-size: 13px;
@@ -162,12 +194,23 @@
   padding-right: 0;
 }
 
-.admin-sidebar.collapsed .admin-nav-item,
-.admin-sidebar.collapsed .admin-logout {
+.admin-sidebar.collapsed .admin-nav-item {
   justify-content: center;
   gap: 0;
   padding-left: 0;
   padding-right: 0;
+}
+
+.admin-sidebar.collapsed .admin-sidebar-footer {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-sidebar.collapsed .admin-logout,
+.admin-sidebar.collapsed .admin-theme-toggle {
+  justify-content: center;
+  gap: 0;
+  margin-left: 0;
 }
 
 @media (max-width: 900px) {
@@ -231,19 +274,28 @@
   }
 
   .admin-sidebar.collapsed .admin-sidebar-logo,
-  .admin-sidebar.collapsed .admin-nav-item,
-  .admin-sidebar.collapsed .admin-logout {
+  .admin-sidebar.collapsed .admin-nav-item {
     justify-content: flex-start;
     gap: 8px;
     padding-left: 8px;
     padding-right: 8px;
   }
 
-  .admin-sidebar.collapsed .admin-nav-item,
-  .admin-sidebar.collapsed .admin-logout {
+  .admin-sidebar.collapsed .admin-nav-item {
     gap: 12px;
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .admin-sidebar.collapsed .admin-sidebar-footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .admin-sidebar.collapsed .admin-logout,
+  .admin-sidebar.collapsed .admin-theme-toggle {
+    justify-content: flex-start;
+    gap: 8px;
   }
 
   .admin-sidebar-logo {

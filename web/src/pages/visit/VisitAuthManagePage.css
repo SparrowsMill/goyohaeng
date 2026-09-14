@@ -72,6 +72,10 @@
   box-shadow: var(--shadow-card);
 }
 
+body[data-theme="dark"] .visit-stat-cards {
+  border: 1px solid var(--color-border-soft);
+}
+
 .visit-stat-cards .today-tag {
   position: absolute;
   top: -8px;

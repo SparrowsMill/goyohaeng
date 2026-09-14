@@ -66,11 +66,6 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           error={errors.password}
-          hint={
-            <button type="button" className="field-link">
-              비밀번호 찾기
-            </button>
-          }
           suffix={
             <button
               type="button"

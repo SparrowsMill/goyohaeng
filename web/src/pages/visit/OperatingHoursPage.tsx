@@ -177,7 +177,7 @@ export default function OperatingHoursPage() {
       });
       setHoursMode(res.hoursMode);
       if (res.hours.length > 0) setVerificationHours(DAYS.map((d) => res.hours.find((h) => h.dayOfWeek === d) ?? defaultVerificationHours()[d - 1]));
-      showToast("방문인증 시간이 저장되었습니다.", "success");
+      showToast("방문 인증시간이 저장되었습니다.", "success");
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : "저장에 실패했습니다.", "error");
     } finally {
@@ -341,7 +341,7 @@ export default function OperatingHoursPage() {
 
           <section className="panel">
             <p className="panel-title">
-              <CheckCircle2 size={15} /> 방문인증 시간 설정
+              <CheckCircle2 size={15} /> 방문 인증시간 설정
             </p>
             <p className="funnel-desc" style={{ marginBottom: 14 }}>
               기본적으로 매장 운영시간과 동일하게 설정됩니다. 필요 시 별도로 설정할 수 있습니다.
@@ -442,7 +442,7 @@ export default function OperatingHoursPage() {
 
             <div className="report-actions" style={{ justifyContent: "flex-end", marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-border-soft)" }}>
               <Button onClick={saveVerificationHours} disabled={savingVerification}>
-                {savingVerification ? "저장 중..." : "방문인증 시간 저장"}
+                {savingVerification ? "저장 중..." : "방문 인증시간 저장"}
               </Button>
             </div>
           </section>

@@ -1,10 +1,50 @@
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import "./charts.css";
 
 interface Point {
   label: string;
   bar?: number;
   line?: number;
+}
+
+const CROSSFADE_MS = 180;
+
+function signature(points: Point[]) {
+  return points.map((p) => `${p.label}:${p.bar ?? ""}:${p.line ?? ""}`).join("|");
+}
+
+// Bars/dots can morph smoothly in place (via CSS transitions on
+// height/left/top) as long as the point count doesn't change — e.g. paging
+// a 7-day window a week at a time. Switching between periods with a
+// different number of points (7일/1개월/3개월) can't be morphed the same
+// way, so those swap via a brief cross-fade instead.
+function useSmoothChartData(data: Point[]) {
+  const [displayData, setDisplayData] = useState(data);
+  const [fading, setFading] = useState(false);
+  const pendingRef = useRef<Point[] | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (signature(data) === signature(displayData)) return;
+
+    if (data.length === displayData.length) {
+      setDisplayData(data);
+      return;
+    }
+
+    pendingRef.current = data;
+    setFading(true);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setDisplayData(pendingRef.current!);
+      setFading(false);
+    }, CROSSFADE_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
+  return { displayData, fading };
 }
 
 // Picks a "nice" step (1/2/2.5/5/10 × a power of ten) that lands close to
@@ -34,7 +74,7 @@ function computeAxis(maxValue: number, headroom = 1.3) {
 }
 
 export default function ComboChart({
-  data,
+  data: dataProp,
   barColor = "color-mix(in srgb, var(--color-primary) 38%, white)",
   lineColor = "var(--color-primary)",
   height = 180,
@@ -55,6 +95,7 @@ export default function ComboChart({
   labelStep?: number;
 }) {
   const gradientId = useId();
+  const { displayData: data, fading } = useSmoothChartData(dataProp);
   const hasBar = data.some((d) => d.bar !== undefined);
   const hasLine = data.some((d) => d.line !== undefined);
   const isCombo = hasBar && hasLine;
@@ -124,8 +165,8 @@ export default function ComboChart({
 
       {hasBar && (
         <div className="chart-bars">
-          {data.map((d) => (
-            <div className="chart-bar-col" key={d.label}>
+          {data.map((d, i) => (
+            <div className="chart-bar-col" key={i}>
               {d.bar !== undefined && <span className="chart-bar-value">{d.bar.toLocaleString()}</span>}
               <div
                 className="chart-bar"
@@ -195,7 +236,7 @@ export default function ComboChart({
         </div>
       )}
 
-      <div className="chart-row">
+      <div className={`chart-row ${fading ? "chart-row-fading" : ""}`}>
         {leftAxis && (
           <div className="chart-axis chart-axis-left" style={{ height }}>
             {leftTicks.map((t) => (
@@ -208,7 +249,7 @@ export default function ComboChart({
           {plot}
           <div className="chart-labels">
             {data.map((d, i) => (
-              <span key={d.label}>{i % labelStep === 0 || i === data.length - 1 ? d.label : ""}</span>
+              <span key={i}>{i % labelStep === 0 || i === data.length - 1 ? d.label : ""}</span>
             ))}
           </div>
         </div>

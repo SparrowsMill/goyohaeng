@@ -127,12 +127,6 @@ export default function PlaceManagePage() {
     }
   };
 
-  const resetForm = () => {
-    if (!place) return;
-    setForm({ name: place.name, phone: place.phone ?? "", homepage: place.homepage ?? "", overview: place.overview ?? "" });
-    showToast("변경 사항을 취소했습니다.", "info");
-  };
-
   const addBenefit = async () => {
     try {
       const created = await createBenefit({ title: "새 혜택", isActive: true });
@@ -350,9 +344,6 @@ export default function PlaceManagePage() {
 
       <div className="place-footer">
         <div className="report-actions">
-          <Button variant="secondary" onClick={resetForm}>
-            변경 취소
-          </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "저장 중..." : "저장"}
           </Button>

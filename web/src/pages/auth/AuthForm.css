@@ -117,3 +117,100 @@
   background: var(--color-border-soft);
   margin: 20px 0;
 }
+
+.signup-steps {
+  margin-bottom: 24px;
+}
+
+.signup-steps-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border-soft);
+  overflow: hidden;
+}
+
+.signup-steps-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.signup-steps-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.signup-step-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-faint);
+}
+
+.signup-step-label.done {
+  color: var(--color-text-soft);
+}
+
+.signup-step-label.current {
+  color: var(--color-primary);
+}
+
+.signup-step-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 11px;
+  background: var(--color-border-soft);
+  color: var(--color-text-faint);
+}
+
+.signup-step-label.done .signup-step-index {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-soft-text);
+}
+
+.signup-step-label.current .signup-step-index {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+@keyframes auth-step-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-step-content {
+  animation: auth-step-fade-in 0.28s ease;
+}
+
+.signup-step-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.signup-step-nav .btn-secondary {
+  flex: 0 0 100px;
+}
+
+.signup-step-nav .btn-primary {
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-step-content {
+    animation: none;
+  }
+}

@@ -17,6 +17,16 @@
   border-color: var(--color-primary-soft);
 }
 
+/* dark mode: box-shadow barely reads against a dark page background, so
+   the card needs an explicit border to stay visually separated from it.
+   Left/right/bottom only — top is left alone so the status-tone accent
+   border above still gets its own width/color. */
+body[data-theme="dark"] .stat-card {
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
 .stat-card-success,
 .stat-card-warning,
 .stat-card-danger {

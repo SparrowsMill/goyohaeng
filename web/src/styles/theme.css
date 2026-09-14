@@ -5,7 +5,7 @@
   --color-bg: #ffffff;
   --color-bg-soft: #ece6d5;
   --color-surface: #ffffff;
-  --color-surface-alt: #faf8f0;
+  --color-surface-alt: #fefaf0;
   --color-border: #d9d4c6;
   --color-border-soft: #e7e2d2;
 
@@ -47,6 +47,47 @@
   --font-serif: 'Noto Serif KR', serif;
 
   --sidebar-width: 224px;
+}
+
+/* ---- dark mode: toggled by AdminLayout via document.body.dataset.theme,
+   scoped this way (not :root) so login/signup stay light-only, and so
+   portaled content (Modal/Toast, which mount straight onto body) still
+   inherits it correctly ---- */
+body[data-theme="dark"] {
+  --color-bg: #2b2920;
+  --color-bg-soft: #38352a;
+  --color-surface: #332f24;
+  --color-surface-alt: #3c372a;
+  --color-border: #4e4939;
+  --color-border-soft: #423e30;
+
+  --color-text: #f2eee2;
+  --color-text-soft: #c5bda9;
+  --color-text-faint: #968f7b;
+
+  --color-primary: #adc38a;
+  --color-primary-dark: #c6d5a8;
+  --color-primary-soft: #444e34;
+  --color-primary-soft-text: #d1dcae;
+  --color-primary-glow: rgba(173, 195, 138, 0.24);
+
+  --color-success: #aac98b;
+  --color-success-soft: #3b4830;
+
+  --color-warning: #e0b47c;
+  --color-warning-soft: #4a3c27;
+
+  --color-danger: #e6a599;
+  --color-danger-soft: #4a3128;
+
+  --color-info: #aabdcb;
+  --color-info-soft: #333e48;
+
+  --color-accent: #c3da79;
+  --color-accent-soft: #414c2e;
+
+  --shadow-card: 0 14px 32px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.48);
 }
 
 * {

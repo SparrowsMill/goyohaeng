@@ -12,8 +12,13 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
+import { useTheme } from "../theme/ThemeContext";
+import Modal from "../components/ui/Modal";
+import Button from "../components/ui/Button";
 import "./AdminLayout.css";
 
 const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
@@ -30,10 +35,12 @@ export default function AdminLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1"
   );
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
@@ -42,6 +49,16 @@ export default function AdminLayout() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useEffect(() => {
+    // Modal/Toast portal straight to document.body, outside this component's
+    // subtree, so the dark-mode scope has to live on body (not just this div)
+    // for them to inherit the dark tokens too.
+    document.body.dataset.theme = theme;
+    return () => {
+      delete document.body.dataset.theme;
+    };
+  }, [theme]);
 
   const isActive = (matchers: string[], exact?: boolean) =>
     matchers.some((m) => (exact ? pathname === m : pathname.startsWith(m)));
@@ -106,21 +123,54 @@ export default function AdminLayout() {
 
         <div className="admin-sidebar-illustration" aria-hidden="true" />
 
-        <button
-          type="button"
-          className="admin-logout"
-          onClick={() => {
-            logout();
-            navigate("/login");
-          }}
-        >
-          <LogOut size={18} strokeWidth={2} /> <span className="admin-nav-label">로그아웃</span>
-        </button>
+        <div className="admin-sidebar-footer">
+          <button
+            type="button"
+            className="admin-logout"
+            onClick={() => setLogoutConfirmOpen(true)}
+          >
+            <LogOut size={18} strokeWidth={2} /> <span className="admin-nav-label">로그아웃</span>
+          </button>
+
+          <button
+            type="button"
+            className="admin-theme-toggle"
+            onClick={toggleTheme}
+            title={collapsed ? (theme === "dark" ? "라이트모드" : "다크모드") : undefined}
+            aria-label={theme === "dark" ? "라이트모드로 전환" : "다크모드로 전환"}
+          >
+            {theme === "dark" ? <Moon size={12} strokeWidth={2} /> : <Sun size={12} strokeWidth={2} />}
+            <span className="admin-nav-label">{theme === "dark" ? "Dark" : "Light"}</span>
+          </button>
+        </div>
       </aside>
 
       <main className="admin-content">
         <Outlet />
       </main>
+
+      <Modal
+        open={logoutConfirmOpen}
+        onClose={() => setLogoutConfirmOpen(false)}
+        title="로그아웃 하시겠습니까?"
+        description="다시 로그인해야 관리자 화면을 이용할 수 있어요."
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setLogoutConfirmOpen(false)}>
+              취소
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              로그아웃
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }

@@ -31,6 +31,16 @@
   display: flex;
   align-items: stretch;
   gap: 8px;
+  transition: opacity 0.18s ease;
+}
+
+/* Bars/dots keep the same point count across a "same shape" data change
+   (e.g. paging a week at a time), so they morph smoothly in place. A
+   period switch (7일/1개월/3개월) changes the point count itself, which
+   can't be morphed the same way — ComboChart cross-fades through this
+   class instead for those. */
+.chart-row-fading {
+  opacity: 0;
 }
 
 .chart-plot-col {
@@ -94,6 +104,19 @@
   width: 100%;
   max-width: 22px;
   border-radius: 0;
+  transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s ease;
+}
+
+.chart-bar-col:hover .chart-bar {
+  filter: brightness(1.1);
+}
+
+.chart-line-dot {
+  transition: transform 0.15s ease;
+}
+
+.chart-line-dot-wrap:hover .chart-line-dot {
+  transform: scale(1.5);
 }
 
 .chart-combo-detailed .chart-bar {
@@ -121,6 +144,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .chart-line-dot-wrap-flip {

@@ -142,10 +142,10 @@ const gapTrendByPeriod = {
     { label: "05/20\n(화)", value: 72 },
   ],
   "1m": [
-    { label: "1주차", value: 52 },
-    { label: "2주차", value: 58 },
-    { label: "3주차", value: 63 },
-    { label: "4주차", value: 72 },
+    { label: "08/25-08/31", value: 52 },
+    { label: "09/01-09/07", value: 58 },
+    { label: "09/08-09/14", value: 63 },
+    { label: "09/15-09/21", value: 72 },
   ],
   "3m": [
     { label: "3월", value: 45 },
@@ -324,12 +324,7 @@ export default function StatsDashboardPage() {
 
         <section className="panel">
           <div className="panel-header">
-            <p className="panel-title">
-              GAP Score 추세{" "}
-              <span title="선택한 기간 동안의 GAP Score 변화예요. (목업 데이터)">
-                <Info size={12} className="info-icon" />
-              </span>
-            </p>
+            <p className="panel-title">GAP Score 추세</p>
             <div className="period-tabs">
               {[
                 { key: "7d", label: "최근 7일" },
@@ -474,12 +469,7 @@ export default function StatsDashboardPage() {
       <section className="panel" style={{ marginBottom: 24 }}>
         <div className="panel-header">
           <div>
-            <p className="panel-title">
-              장소 조회 → 방문인증 전환{" "}
-              <span title="장소 상세페이지 조회부터 방문인증 페이지 진입, 실제 방문인증 완료까지의 전환 흐름이에요. 방문인증 완료는 과거부터 쌓여온 데이터를 사용하는 반면 조회·진입 수치는 이 기능이 추가된 시점부터 새로 쌓이기 시작해서, 초반에는 완료 건수가 조회·진입 건수보다 더 크게 보일 수 있어요.">
-                <Info size={12} className="info-icon" />
-              </span>
-            </p>
+            <p className="panel-title">장소 조회 → 방문인증 전환</p>
             <p className="funnel-desc">앱 화면 진입부터 실제 방문 완료까지의 전환 흐름을 확인하세요.</p>
           </div>
         </div>
