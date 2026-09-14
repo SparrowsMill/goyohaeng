@@ -166,7 +166,7 @@ export default function PlaceManagePage() {
       <div className="place-page">
         <PageHeader
           title="장소 관리"
-          icon={<img src="/assets/장소 관리.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+          icon={<img src="/assets/place-manage.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
           iconPlain
           hideSettings
         />
@@ -178,7 +178,7 @@ export default function PlaceManagePage() {
   return (
     <div className="place-page">
       <PageHeader
-        icon={<img src="/assets/장소 관리.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+        icon={<img src="/assets/place-manage.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
         iconPlain
         title="장소 관리"
         hideSettings

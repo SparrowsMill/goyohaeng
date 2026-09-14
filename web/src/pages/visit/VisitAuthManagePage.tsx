@@ -272,7 +272,7 @@ export default function VisitAuthManagePage() {
     <div className="visit-auth-page">
       <PageHeader
         title="방문 인증 관리"
-        icon={<img src="/assets/방문 인증.png" alt="" className="page-title-icon-img" />}
+        icon={<img src="/assets/visit-auth.png" alt="" className="page-title-icon-img" />}
         iconPlain
         hideSettings
         right={

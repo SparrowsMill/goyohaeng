@@ -22,7 +22,7 @@ function useSmoothChartData(data: Point[]) {
   const [displayData, setDisplayData] = useState(data);
   const [fading, setFading] = useState(false);
   const pendingRef = useRef<Point[] | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (signature(data) === signature(displayData)) return;

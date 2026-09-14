@@ -90,7 +90,7 @@ export default function SettingsPage() {
       <div className="settings-page">
         <PageHeader
           title="계정 관리"
-          icon={<img src="/assets/계정 관리.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+          icon={<img src="/assets/account-settings.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
           iconPlain
           hideSettings
         />
@@ -102,7 +102,7 @@ export default function SettingsPage() {
   return (
     <div className="settings-page">
       <PageHeader
-        icon={<img src="/assets/계정 관리.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+        icon={<img src="/assets/account-settings.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
         iconPlain
         title="계정 관리"
         hideSettings

@@ -216,7 +216,7 @@ export default function StatsDashboardPage() {
       <div className="stats-page">
         <PageHeader
           title="통계 데이터 보드"
-          icon={<img src="/assets/통계 데이터 보드.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+          icon={<img src="/assets/stats-dashboard.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
           iconPlain
           hideSettings
         />
@@ -232,7 +232,7 @@ export default function StatsDashboardPage() {
     <div className="stats-page">
       <PageHeader
         title="통계 데이터 보드"
-        icon={<img src="/assets/통계 데이터 보드.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+        icon={<img src="/assets/stats-dashboard.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
         iconPlain
         hideSettings
         right={

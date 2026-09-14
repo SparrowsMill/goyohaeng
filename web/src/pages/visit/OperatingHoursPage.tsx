@@ -270,7 +270,7 @@ export default function OperatingHoursPage() {
       <>
         <PageHeader
           title="운영시간 관리"
-          icon={<img src="/assets/운영 시간.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+          icon={<img src="/assets/operating-hours.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
           iconPlain
           hideSettings
         />
@@ -283,7 +283,7 @@ export default function OperatingHoursPage() {
     <div className="operating-hours-page">
       <PageHeader
         title="운영시간 관리"
-        icon={<img src="/assets/운영 시간.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
+        icon={<img src="/assets/operating-hours.png" alt="" className="page-title-icon-img page-title-icon-img-nudge" />}
         iconPlain
         hideSettings
       />
