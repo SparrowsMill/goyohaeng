@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Info, ShieldCheck, Calendar, Eye, EyeOff, User, Phone, Mail, Building2, Hash, MapPin, Lock } from "lucide-react";
 import AuthHeader from "../../components/ui/AuthHeader";
@@ -18,6 +18,7 @@ interface FormState {
   businessName: string;
   businessNumber: string;
   address: string;
+  addressDetail: string;
   username: string;
   password: string;
   passwordConfirm: string;
@@ -31,10 +32,48 @@ const initialForm: FormState = {
   businessName: "",
   businessNumber: "",
   address: "",
+  addressDetail: "",
   username: "",
   password: "",
   passwordConfirm: "",
 };
+
+interface DaumPostcodeResult {
+  roadAddress: string;
+  jibunAddress: string;
+}
+
+declare global {
+  interface Window {
+    daum?: {
+      Postcode: new (options: { oncomplete: (data: DaumPostcodeResult) => void }) => {
+        open: (position?: { left: number; top: number }) => void;
+      };
+    };
+  }
+}
+
+const DAUM_POSTCODE_SRC = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+
+function loadDaumPostcodeScript() {
+  return new Promise<void>((resolve, reject) => {
+    if (window.daum?.Postcode) {
+      resolve();
+      return;
+    }
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${DAUM_POSTCODE_SRC}"]`);
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error("주소 검색 스크립트를 불러오지 못했습니다.")));
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = DAUM_POSTCODE_SRC;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("주소 검색 스크립트를 불러오지 못했습니다."));
+    document.head.appendChild(script);
+  });
+}
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BIRTH_DATE_PATTERN = /^\d{4}[.-]\d{2}[.-]\d{2}$/;
@@ -66,6 +105,12 @@ export default function SignupRequestPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [searchingAddress, setSearchingAddress] = useState(false);
+
+  // 미리 로드해둬야 클릭 핸들러가 동기적으로 open()을 호출할 수 있어서 팝업 차단을 피할 수 있다.
+  useEffect(() => {
+    loadDaumPostcodeScript().catch(() => {});
+  }, []);
 
   const clearError = (key: keyof FormState) => {
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
@@ -105,6 +150,34 @@ export default function SignupRequestPage() {
     clearError("businessNumber");
   };
 
+  const openPostcode = () => {
+    const width = 500;
+    const height = 600;
+    const left = Math.round(window.screenX + (window.outerWidth - width) / 2);
+    const top = Math.round(window.screenY + (window.outerHeight - height) / 2);
+
+    new window.daum!.Postcode({
+      oncomplete: (data) => {
+        setForm((prev) => ({ ...prev, address: data.roadAddress || data.jibunAddress }));
+        clearError("address");
+      },
+    }).open({ left, top });
+  };
+
+  const handleAddressSearch = () => {
+    // 스크립트가 이미 로드돼 있으면(대부분의 경우) 클릭 핸들러 안에서 바로 동기 호출해야
+    // 브라우저가 사용자 제스처로 인식해 팝업 차단을 하지 않는다.
+    if (window.daum?.Postcode) {
+      openPostcode();
+      return;
+    }
+    setSearchingAddress(true);
+    loadDaumPostcodeScript()
+      .then(openPostcode)
+      .catch((err) => showToast(err instanceof Error ? err.message : "주소 검색을 불러오지 못했습니다.", "error"))
+      .finally(() => setSearchingAddress(false));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -139,7 +212,7 @@ export default function SignupRequestPage() {
         phone: form.phone.trim(),
         businessName: form.businessName.trim(),
         businessRegistrationNo: form.businessNumber.trim(),
-        submittedStoreAddress: form.address.trim(),
+        submittedStoreAddress: [form.address.trim(), form.addressDetail.trim()].filter(Boolean).join(" "),
       });
       showToast("가입 신청이 완료되었습니다. 로그인 후 승인 상태를 확인해주세요.", "success");
       navigate("/login");
@@ -235,14 +308,34 @@ export default function SignupRequestPage() {
               onChange={updateBizNo}
               error={errors.businessNumber}
             />
-            <Field
-              label="매장 주소"
-              icon={<MapPin size={16} />}
-              placeholder="매장 주소를 입력하세요"
-              value={form.address}
-              onChange={update("address")}
-              error={errors.address}
-            />
+            <div className="field-with-action" style={{ gridColumn: "1 / -1" }}>
+              <Field
+                label="매장 주소"
+                icon={<MapPin size={16} />}
+                placeholder="주소 검색을 눌러주세요"
+                value={form.address}
+                onClick={handleAddressSearch}
+                readOnly
+                error={errors.address}
+              />
+              <button
+                type="button"
+                className="field-action-btn"
+                onClick={handleAddressSearch}
+                disabled={searchingAddress}
+              >
+                {searchingAddress ? "불러오는 중..." : "주소 검색"}
+              </button>
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <Field
+                label="상세 주소"
+                icon={<MapPin size={16} />}
+                placeholder="동/호수 등 상세 주소 (선택)"
+                value={form.addressDetail}
+                onChange={update("addressDetail")}
+              />
+            </div>
           </div>
         </div>
 

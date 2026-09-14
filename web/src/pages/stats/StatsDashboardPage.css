@@ -241,6 +241,12 @@
   color: var(--color-text);
 }
 
+.funnel-step-subrate {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
 .funnel-arrow {
   color: var(--color-text-faint);
   flex-shrink: 0;

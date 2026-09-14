@@ -35,6 +35,20 @@ export function getVerificationFunnel() {
   return apiRequest<VerificationFunnel>("/business/analytics/verification-funnel");
 }
 
+export interface PageFunnel {
+  placeId: number;
+  funnel: {
+    placeDetailView: { count: number };
+    visitAuthPageEnter: { count: number; conversionRate: number };
+    verifiedVisit: { count: number; conversionRate: number };
+  };
+  overallConversionRate: number;
+}
+
+export function getPageFunnel() {
+  return apiRequest<PageFunnel>("/business/analytics/page-funnel");
+}
+
 interface NaverInterestPoint {
   periodStart: string;
   ratio: number;

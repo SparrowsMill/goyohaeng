@@ -7,14 +7,14 @@ import {
   TrendingUp,
   ChevronLeft,
   ChevronRight,
-  Ticket,
-  ListChecks,
   CheckCircle2,
   ArrowRight,
   Users,
   RotateCcw,
   Target,
   Award,
+  Eye,
+  LogIn,
 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Badge from "../../components/ui/Badge";
@@ -23,7 +23,7 @@ import Skeleton from "../../components/ui/Skeleton";
 import { useToast } from "../../components/ui/Toast";
 import { ApiError } from "../../api/client";
 import { getVisitVerifications, type VisitVerificationListItem } from "../../api/visitVerifications";
-import { getVerificationFunnel, type VerificationFunnel } from "../../api/analytics";
+import { getPageFunnel, type PageFunnel } from "../../api/analytics";
 import type { VerificationStatus } from "../../api/dashboard";
 import "./StatsDashboardPage.css";
 
@@ -162,7 +162,7 @@ export default function StatsDashboardPage() {
   const { showToast } = useToast();
   const [period, setPeriod] = useState<"7d" | "1m" | "3m">("7d");
   const [loading, setLoading] = useState(true);
-  const [funnel, setFunnel] = useState<VerificationFunnel | null>(null);
+  const [pageFunnel, setPageFunnel] = useState<PageFunnel | null>(null);
   const [trend, setTrend] = useState<TrendSeries | null>(null);
   const [weekOffset, setWeekOffset] = useState<Record<keyof TrendSeries, number>>({
     verifiedDaily: 0,
@@ -171,9 +171,9 @@ export default function StatsDashboardPage() {
   });
 
   useEffect(() => {
-    Promise.all([getVerificationFunnel(), loadTrendSeries()])
-      .then(([funnelRes, trendRes]) => {
-        setFunnel(funnelRes);
+    Promise.all([getPageFunnel(), loadTrendSeries()])
+      .then(([pageFunnelRes, trendRes]) => {
+        setPageFunnel(pageFunnelRes);
         setTrend(trendRes);
       })
       .catch((err) => showToast(err instanceof ApiError ? err.message : "통계를 불러오지 못했습니다.", "error"))
@@ -474,29 +474,35 @@ export default function StatsDashboardPage() {
       <section className="panel" style={{ marginBottom: 24 }}>
         <div className="panel-header">
           <div>
-            <p className="panel-title">방문 인증 현황</p>
-            <p className="funnel-desc">인증번호 발급부터 방문 인증 완료까지의 전환 흐름을 확인하세요.</p>
+            <p className="panel-title">
+              장소 조회 → 방문인증 전환{" "}
+              <span title="장소 상세페이지 조회부터 방문인증 페이지 진입, 실제 방문인증 완료까지의 전환 흐름이에요. 방문인증 완료는 과거부터 쌓여온 데이터를 사용하는 반면 조회·진입 수치는 이 기능이 추가된 시점부터 새로 쌓이기 시작해서, 초반에는 완료 건수가 조회·진입 건수보다 더 크게 보일 수 있어요.">
+                <Info size={12} className="info-icon" />
+              </span>
+            </p>
+            <p className="funnel-desc">앱 화면 진입부터 실제 방문 완료까지의 전환 흐름을 확인하세요.</p>
           </div>
         </div>
         <div className="funnel-row">
           <div className="funnel-steps">
             <div className="funnel-step">
               <span className="funnel-step-icon">
-                <Ticket size={16} />
+                <Eye size={16} />
               </span>
               <div>
-                <p className="funnel-step-label">1 인증번호 발급</p>
-                <p className="funnel-step-value">{funnel?.totalRequestedCount ?? 0} 건</p>
+                <p className="funnel-step-label">1 상세페이지 조회</p>
+                <p className="funnel-step-value">{pageFunnel?.funnel.placeDetailView.count ?? 0} 건</p>
               </div>
             </div>
             <ArrowRight size={18} className="funnel-arrow" />
             <div className="funnel-step">
               <span className="funnel-step-icon">
-                <ListChecks size={16} />
+                <LogIn size={16} />
               </span>
               <div>
-                <p className="funnel-step-label">2 처리 완료</p>
-                <p className="funnel-step-value">{funnel?.resolvedCount ?? 0} 건</p>
+                <p className="funnel-step-label">2 방문인증 페이지 진입</p>
+                <p className="funnel-step-value">{pageFunnel?.funnel.visitAuthPageEnter.count ?? 0} 건</p>
+                <p className="funnel-step-subrate">전환 {pageFunnel?.funnel.visitAuthPageEnter.conversionRate ?? 0}%</p>
               </div>
             </div>
             <ArrowRight size={18} className="funnel-arrow" />
@@ -505,16 +511,17 @@ export default function StatsDashboardPage() {
                 <CheckCircle2 size={16} />
               </span>
               <div>
-                <p className="funnel-step-label">3 방문 인증 완료</p>
-                <p className="funnel-step-value">{funnel?.funnel.verified.count ?? 0} 건</p>
+                <p className="funnel-step-label">3 방문인증 완료</p>
+                <p className="funnel-step-value">{pageFunnel?.funnel.verifiedVisit.count ?? 0} 건</p>
+                <p className="funnel-step-subrate">전환 {pageFunnel?.funnel.verifiedVisit.conversionRate ?? 0}%</p>
               </div>
             </div>
           </div>
           <div className="funnel-rate">
-            <p>인증 전환율</p>
-            <p className="funnel-rate-value">{funnel?.verificationRate ?? 0}%</p>
+            <p>전체 전환율</p>
+            <p className="funnel-rate-value">{pageFunnel?.overallConversionRate ?? 0}%</p>
             <p className="funnel-rate-sub">
-              ({funnel?.funnel.verified.count ?? 0} / {funnel?.totalRequestedCount ?? 0})
+              ({pageFunnel?.funnel.verifiedVisit.count ?? 0} / {pageFunnel?.funnel.placeDetailView.count ?? 0})
             </p>
           </div>
         </div>
