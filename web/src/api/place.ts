@@ -81,6 +81,33 @@ export function getPlaceGapHistory(placeId: number, period: GapHistoryPeriod) {
   return apiRequest<PlaceGapHistory>(`/places/${placeId}/gap/history`, { query: { period } });
 }
 
+export interface PlaceTrendContent {
+  id: number;
+  contentType: string;
+  title: string | null;
+  url: string;
+  author: string | null;
+  publishedAt: string | null;
+}
+
+export interface PlaceTrendSummary {
+  placeId: number;
+  placeName: string;
+  summaryText: string | null;
+  keywords: string[];
+  periodStart: string | null;
+  periodEnd: string | null;
+  generatedAt: string | null;
+  contents: PlaceTrendContent[];
+  searchTerm: string | null;
+  searchInterest: { periodStart: string; ratio: number }[];
+}
+
+// 공개 API (인증 불필요)
+export function getPlaceTrendSummary(placeId: number) {
+  return apiRequest<PlaceTrendSummary>(`/places/${placeId}/trends`);
+}
+
 export interface UpdatePlacePayload {
   name?: string;
   phone?: string | null;

@@ -7,11 +7,13 @@ import Skeleton from "../../components/ui/Skeleton";
 import EmptyState from "../../components/ui/EmptyState";
 import { useToast } from "../../components/ui/Toast";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import { useAuth } from "../../auth/AuthContext";
 import { ApiError } from "../../api/client";
 import { getNaverAnalytics, type NaverAnalytics } from "../../api/analytics";
+import { getPlaceTrendSummary, type PlaceTrendSummary } from "../../api/place";
 import "./MonitoringPage.css";
 
-// 아래 목업 데이터(TOP 키워드, 블로그/SNS 피드, 채널별 언급 비중, AI 요약)는
+// 아래 목업 데이터(TOP 키워드, 채널별 언급 비중, AI 요약)는
 // 백엔드 API 범위 밖(스펙 20장 참고)이라 아직 실제 데이터로 대체할 수 없다.
 const topKeywords = [
   { rank: 1, tag: "전주여행", ratio: 18.7 },
@@ -24,21 +26,16 @@ const topKeywords = [
   { rank: 8, tag: "골목산책", ratio: 5.3 },
 ];
 
-const posts = [
-  { channel: "블로그", title: "전주 한옥마을 1박 2일 여행 코스 추천!", desc: "한옥 속소에서의 숙박 후 아침 산책, 전주비빔밥 맛집, 숨은 골목 카페까지 …", date: "2024.05.20" },
-  { channel: "인스타그램", title: "전주 한옥마을 감성 사진 스팟 모음 📸", desc: "은은한 한옥 골목 담벼락, 전통찻집 부치서 인생샷 건지는 장소들!", date: "2024.05.19" },
-  { channel: "유튜브", title: "전주여행 브이로그 | 한옥체험 & 먹방 투어", desc: "하루 종일 전주에서 놀고 먹은 리얼 후기! 한옥숙박부터 야시장까지!", date: "2024.05.18" },
-  { channel: "인스타그램", title: "전주비빔밥은 여기! 전주 맛집 리스트", desc: "현지인이 추천하는 진짜 로컬 맛집 5곳 정리해봤어요 :)", date: "2024.05.17" },
-  { channel: "블로그", title: "전주 한옥마을 야경 산책 코스", desc: "해 질 무렵부터 조명이 켜지는 한옥마을, 야경 명소와 카페 추천", date: "2024.05.16" },
-  { channel: "기타 SNS", title: "비 오는 날 전주 한옥마을 분위기 최고 ☔", desc: "우산 들고 걷는 한옥마을 골목길, 감성 그 자체였어요.", date: "2024.05.16" },
-];
-
 const channelSegments = [
   { label: "블로그", value: 5216, color: "var(--color-primary)" },
   { label: "인스타그램", value: 3276, color: "#c98a4f" },
   { label: "유튜브", value: 2104, color: "#d9c368" },
   { label: "기타 SNS/웹", value: 2268, color: "#c9c2ab" },
 ];
+
+const CONTENT_TYPE_LABEL: Record<string, string> = {
+  NAVER_BLOG: "블로그",
+};
 
 const DIRECTION_META = {
   UP: { icon: TrendingUp, label: "상승", tone: "success" },
@@ -48,9 +45,14 @@ const DIRECTION_META = {
 
 export default function MonitoringPage() {
   const { showToast } = useToast();
+  const { businessAccount } = useAuth();
+  const placeId = businessAccount?.place?.id;
   const [naver, setNaver] = useState<NaverAnalytics | null>(null);
+  const [trend, setTrend] = useState<PlaceTrendSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trendLoading, setTrendLoading] = useState(true);
   const showSkeleton = useDelayedLoading(loading);
+  const showTrendSkeleton = useDelayedLoading(trendLoading);
 
   useEffect(() => {
     getNaverAnalytics()
@@ -59,6 +61,18 @@ export default function MonitoringPage() {
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!placeId) {
+      setTrendLoading(false);
+      return;
+    }
+    getPlaceTrendSummary(placeId)
+      .then(setTrend)
+      .catch((err) => showToast(err instanceof ApiError ? err.message : "블로그 언급 데이터를 불러오지 못했습니다.", "error"))
+      .finally(() => setTrendLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeId]);
 
   return (
     <>
@@ -147,26 +161,35 @@ export default function MonitoringPage() {
 
       <div className="grid grid-2" style={{ gridTemplateColumns: "1.6fr 1fr", alignItems: "start" }}>
         <section className="panel">
-          <p className="panel-title">관련 블로그 및 SNS 전체 언급 (목업 데이터)</p>
-          <ul className="post-list">
-            {posts.map((p) => (
-              <li key={p.title}>
-                <span className="post-channel">
-                  <MessageCircle size={14} />
-                  {p.channel}
-                </span>
-                <div className="post-body">
-                  <p className="post-title">{p.title}</p>
-                  <p className="post-desc">{p.desc}</p>
-                </div>
-                <span className="post-date">{p.date}</span>
-                <ExternalLink size={14} className="post-link-icon" />
-              </li>
-            ))}
-          </ul>
-          <button className="panel-action" style={{ margin: "12px auto 0", display: "flex" }}>
-            더보기
-          </button>
+          <p className="panel-title">관련 블로그 언급</p>
+          {trendLoading ? (
+            showTrendSkeleton ? <Skeleton height={200} /> : null
+          ) : !trend || trend.contents.length === 0 ? (
+            <EmptyState icon={<MessageCircle size={18} />} title="아직 수집된 블로그 언급이 없습니다." />
+          ) : (
+            <ul className="post-list">
+              {trend.contents.map((c) => (
+                <li key={c.id}>
+                  <a href={c.url} target="_blank" rel="noreferrer" style={{ display: "contents" }}>
+                    <span className="post-channel">
+                      <MessageCircle size={14} />
+                      {CONTENT_TYPE_LABEL[c.contentType] ?? c.contentType}
+                    </span>
+                    <div className="post-body">
+                      <p className="post-title">{c.title ?? "(제목 없음)"}</p>
+                      <p className="post-desc">{c.author ? `작성자: ${c.author}` : ""}</p>
+                    </div>
+                    <span className="post-date">
+                      {c.publishedAt
+                        ? new Date(c.publishedAt).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
+                        : "-"}
+                    </span>
+                    <ExternalLink size={14} className="post-link-icon" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <div className="stack">
