@@ -208,7 +208,12 @@ body[data-theme="dark"] .visit-stat-cards {
   border-radius: 999px;
 }
 
+.session-filter-tabs {
+  overflow-x: auto;
+}
+
 .session-filter-tabs button {
+  flex-shrink: 0;
   border: none;
   background: none;
   padding: 7px 14px;
@@ -216,6 +221,7 @@ body[data-theme="dark"] .visit-stat-cards {
   font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-soft);
+  white-space: nowrap;
 }
 
 .session-filter-tabs button.active {
@@ -232,7 +238,8 @@ body[data-theme="dark"] .visit-stat-cards {
 
 .visit-auth-page .table-wrap {
   border-radius: 16px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .session-detail-trigger {
@@ -417,5 +424,30 @@ body[data-theme="dark"] .visit-stat-cards {
   }
   .visit-status-divider {
     display: none;
+  }
+
+  /* 아이콘·간격·폰트를 줄여 3칸(방문 예정/인증 완료/인증 실패)이 폰 폭 안에
+     들어오게 한다 — 안 그러면 오른쪽 칸이 화면 밖으로 잘려 보인다. */
+  .visit-stat-cards {
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .visit-stat-card {
+    gap: 8px;
+  }
+
+  .visit-stat-card-icon,
+  .visit-stat-card-icon-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .visit-stat-card-value {
+    font-size: 18px;
+  }
+
+  .visit-stat-card-label {
+    font-size: 11px;
   }
 }
