@@ -106,7 +106,7 @@ export default function MonitoringPage() {
           </>
         )}
         <p className="hours-footnote" style={{ marginTop: 8 }}>
-          ratio는 실제 검색 횟수가 아니라 상대적인 검색 관심도예요.
+          실제 검색 횟수가 아니라 상대적인 검색 관심도예요.
         </p>
       </section>
 
