@@ -49,9 +49,9 @@ const STATUS_META: Record<VerificationStatus, { label: string; tone: BadgeTone; 
 
 const FILTERS: { label: string; status?: VerificationStatus; statuses?: VerificationStatus[] }[] = [
   { label: "전체" },
-  { label: "방문 예정", status: "ISSUED" },
-  { label: "인증 완료", status: "VERIFIED" },
-  { label: "인증 실패", statuses: ["EXPIRED", "CANCELLED", "FAILED"] },
+  { label: "방문예정", status: "ISSUED" },
+  { label: "인증완료", status: "VERIFIED" },
+  { label: "인증실패", statuses: ["EXPIRED", "CANCELLED", "FAILED"] },
 ];
 
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];

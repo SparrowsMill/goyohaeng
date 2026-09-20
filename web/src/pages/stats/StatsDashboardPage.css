@@ -129,6 +129,16 @@
   padding: 24px 16px;
 }
 
+/* "고요지수 추세" 제목 + 최근7일/1개월/3개월 탭이 좁은 폭에서 한 줄에 억지로
+   끼워지면서 글자 자체가 줄바꿈되던 것 — 대신 줄 전체를 2줄로 나눠 쌓는다. */
+.panel-header:has(.period-tabs) {
+  flex-wrap: wrap;
+}
+
+.period-tabs button {
+  white-space: nowrap;
+}
+
 .trend-panel .panel-header {
   gap: 14px;
 }
@@ -283,21 +293,26 @@
 .gap-hero-row {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
-  gap: 16px;
+  gap: 12px;
   align-items: stretch;
   margin-bottom: 16px;
 }
 
 .gap-score-panel-compact {
   gap: 8px;
-  padding: 16px;
+  padding: 12px;
+}
+
+.gap-score-panel-compact .panel-title {
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .trend-monitoring-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px;
+  gap: 8px;
+  padding: 12px;
   text-decoration: none;
   color: inherit;
   background: var(--color-primary-soft);
@@ -313,8 +328,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--color-surface);
@@ -329,9 +344,10 @@
 }
 
 .trend-monitoring-card-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-text);
+  white-space: nowrap;
 }
 
 .trend-monitoring-card-desc {
