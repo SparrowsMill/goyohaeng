@@ -16,8 +16,8 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  { path: "/login", element: <AuthLayout><LoginPage /></AuthLayout> },
-  { path: "/signup", element: <AuthLayout wide><SignupRequestPage /></AuthLayout> },
+  { path: "/login", element: <AuthLayout showLogo={false}><LoginPage /></AuthLayout> },
+  { path: "/signup", element: <AuthLayout wide showLogo={false}><SignupRequestPage /></AuthLayout> },
   {
     path: "/approval-status",
     element: (

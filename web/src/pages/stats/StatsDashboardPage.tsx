@@ -265,7 +265,7 @@ export default function StatsDashboardPage() {
           </span>
           <span className="trend-monitoring-card-body">
             <span className="trend-monitoring-card-title">트렌드 모니터링</span>
-            <span className="trend-monitoring-card-desc">검색 관심도·언급 키워드·AI 요약을 한눈에 확인해요.</span>
+            <span className="trend-monitoring-card-desc">장소와 관련된 트렌드를 확인해요.</span>
           </span>
           <ChevronRight size={18} className="trend-monitoring-card-arrow" />
         </Link>
