@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Badge, { type BadgeTone } from "../../components/ui/Badge";
@@ -85,6 +86,22 @@ function formatCountdown(totalSeconds: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+/** "인증 완료 / 만료 시간" 칸(데스크톱 표 컬럼·모바일 상세보기 팝오버 공용). */
+function renderExpiryInfo(s: VisitVerificationListItem, now: number) {
+  if (s.status === "VERIFIED") return formatDateTime(s.verifiedAt);
+  if (s.status !== "ISSUED") return formatDateTime(s.expiresAt);
+  const remaining = Math.max(0, Math.floor((new Date(s.expiresAt).getTime() - now) / 1000));
+  return (
+    <>
+      {formatDateTime(s.expiresAt)}
+      <br />
+      <span className="table-subtext">
+        {remaining > 0 ? `만료까지 ${formatCountdown(remaining)}` : "만료됨"}
+      </span>
+    </>
+  );
+}
+
 export default function VisitAuthManagePage() {
   const { showToast } = useToast();
   const [items, setItems] = useState<VisitVerificationListItem[]>([]);
@@ -105,9 +122,13 @@ export default function VisitAuthManagePage() {
   const [rejectReason, setRejectReason] = useState("");
   const [pendingToggle, setPendingToggle] = useState<boolean | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
-  const [detailInfo, setDetailInfo] = useState<{ id: number; bottom: number; left: number } | null>(null);
+  const [detailInfo, setDetailInfo] = useState<
+    { id: number; bottom: number; left: number; item: VisitVerificationListItem } | null
+  >(null);
   const [detail, setDetail] = useState<VisitVerificationDetail | null>(null);
   const [visitCount, setVisitCount] = useState<number | null>(null);
+  // 모바일 카드 목록에서 인증번호를 눌러 펼친 행(인증하기/거절 버튼을 그때만 보여줌).
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
 
   const loadList = useCallback(() => {
     setLoading(true);
@@ -241,6 +262,7 @@ export default function VisitAuthManagePage() {
       id: item.id,
       bottom: window.innerHeight - rect.top + 10,
       left: Math.min(Math.max(12, rect.right - POPOVER_WIDTH), window.innerWidth - POPOVER_WIDTH - 12),
+      item,
     });
     setDetail(null);
     setVisitCount(null);
@@ -362,6 +384,7 @@ export default function VisitAuthManagePage() {
           </div>
         </div>
 
+        <div className="visit-desktop-table">
         <Table
           rowKey={(s) => s.id}
           data={loading ? [] : items}
@@ -424,20 +447,7 @@ export default function VisitAuthManagePage() {
             {
               key: "expiresAt",
               header: "인증 완료 / 만료 시간",
-              render: (s) => {
-                if (s.status === "VERIFIED") return formatDateTime(s.verifiedAt);
-                if (s.status !== "ISSUED") return formatDateTime(s.expiresAt);
-                const remaining = Math.max(0, Math.floor((new Date(s.expiresAt).getTime() - now) / 1000));
-                return (
-                  <>
-                    {formatDateTime(s.expiresAt)}
-                    <br />
-                    <span className="table-subtext">
-                      {remaining > 0 ? `만료까지 ${formatCountdown(remaining)}` : "만료됨"}
-                    </span>
-                  </>
-                );
-              },
+              render: (s) => renderExpiryInfo(s, now),
             },
             {
               key: "actions",
@@ -450,6 +460,67 @@ export default function VisitAuthManagePage() {
             },
           ]}
         />
+        </div>
+
+        <div className="visit-session-cards">
+          {loading ? (
+            <EmptyState icon={<Search size={18} />} title="불러오는 중..." />
+          ) : items.length === 0 ? (
+            <EmptyState
+              icon={<Search size={18} />}
+              title="조건에 맞는 인증 세션이 없습니다."
+              description="필터나 검색어를 변경해보세요."
+            />
+          ) : (
+            items.map((s) => {
+              const meta = STATUS_META[s.status];
+              const StatusIcon = meta.icon;
+              const expandable = s.status === "ISSUED";
+              const expanded = expandable && expandedRowId === s.id;
+              return (
+                <div key={s.id} className="session-card">
+                  <button
+                    type="button"
+                    className="session-card-head"
+                    disabled={!expandable}
+                    onClick={() => setExpandedRowId((id) => (id === s.id ? null : s.id))}
+                  >
+                    <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
+                      {meta.label}
+                    </Badge>
+                    <span className="mono session-card-code">{s.verificationCode}</span>
+                    {expandable && (
+                      <ChevronDown
+                        size={16}
+                        className={`session-card-chevron ${expanded ? "open" : ""}`}
+                      />
+                    )}
+                  </button>
+                  <p className="session-card-scheduled">
+                    {formatDateTime(s.expectedArrivalAt ?? s.issuedAt)} 방문 예정
+                  </p>
+                  {expanded && (
+                    <div className="session-action-buttons">
+                      <button type="button" className="session-confirm-btn" onClick={() => setApproveTarget(s)}>
+                        <Zap size={11} /> 인증하기
+                      </button>
+                      <button
+                        type="button"
+                        className="session-confirm-btn danger"
+                        onClick={() => setRejectTarget(s)}
+                      >
+                        <Ban size={11} /> 거절
+                      </button>
+                    </div>
+                  )}
+                  <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
+                    상세보기 <ChevronRight size={14} />
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
 
         <div className="visit-pagination">
           <button
@@ -586,6 +657,10 @@ export default function VisitAuthManagePage() {
                 <div>
                   <dt>발급 시각</dt>
                   <dd>{formatDateTime(detail.issuedAt)}</dd>
+                </div>
+                <div>
+                  <dt>인증 완료 / 만료</dt>
+                  <dd>{renderExpiryInfo(detailInfo.item, now)}</dd>
                 </div>
                 {detail.status === "FAILED" && (
                   <div className="session-detail-fail-reason">

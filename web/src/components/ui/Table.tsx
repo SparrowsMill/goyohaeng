@@ -43,11 +43,7 @@ export default function Table<T>({
             data.map((row) => (
               <tr key={rowKey(row)}>
                 {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className={col.className}
-                    data-label={typeof col.header === "string" ? col.header : undefined}
-                  >
+                  <td key={col.key} className={col.className}>
                     {col.render(row)}
                   </td>
                 ))}
