@@ -51,8 +51,7 @@ const FILTERS: { label: string; status?: VerificationStatus; statuses?: Verifica
   { label: "전체" },
   { label: "방문 예정", status: "ISSUED" },
   { label: "인증 완료", status: "VERIFIED" },
-  { label: "시간 만료", status: "EXPIRED" },
-  { label: "취소/거절", statuses: ["CANCELLED", "FAILED"] },
+  { label: "인증 실패", statuses: ["EXPIRED", "CANCELLED", "FAILED"] },
 ];
 
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -77,13 +76,6 @@ function formatDateTime(value: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-/** 모바일 카드의 방문 예정 시간 — 날짜·오전/오후 없이 24시간 HH:mm만. */
-function formatTimeOnly(value: string | null) {
-  if (!value) return "-";
-  const d = new Date(value);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
 function formatCountdown(totalSeconds: number) {
@@ -486,16 +478,16 @@ export default function VisitAuthManagePage() {
                       <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
                         {meta.label}
                       </Badge>
-                      <span className="session-card-time">
-                        {formatTimeOnly(s.expectedArrivalAt ?? s.issuedAt)}
-                      </span>
+                      <span className="mono session-card-code">{s.verificationCode}</span>
                     </div>
                     <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
                       상세보기 <ChevronRight size={14} />
                     </button>
                   </div>
                   <div className="session-card-row">
-                    <span className="mono session-card-code">{s.verificationCode}</span>
+                    <span className="session-card-time">
+                      {formatDateTime(s.expectedArrivalAt ?? s.issuedAt)}
+                    </span>
                     {s.status === "ISSUED" && (
                       <div className="session-action-buttons">
                         <button type="button" className="session-confirm-btn" onClick={() => setApproveTarget(s)}>
@@ -577,7 +569,7 @@ export default function VisitAuthManagePage() {
         open={approveTarget !== null}
         onClose={() => setApproveTarget(null)}
         title="바로 인증 처리할까요?"
-        description={approveTarget ? `인증번호 ${approveTarget.verificationCode}의 방문을 지금 바로 인증 완료로 처리해요.` : undefined}
+        description={approveTarget ? `인증번호 ${approveTarget.verificationCode}의 방문을 인증 완료로 처리해요.` : undefined}
         footer={
           <>
             <Button variant="secondary" onClick={() => setApproveTarget(null)} disabled={actionBusy}>

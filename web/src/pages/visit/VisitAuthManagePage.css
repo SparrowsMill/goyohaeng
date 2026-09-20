@@ -425,6 +425,13 @@ body[data-theme="dark"] .visit-stat-cards {
 }
 
 @media (max-width: 700px) {
+  /* 스탯 카드가 제목 아래로 줄바꿈되면서, 데스크톱에선 안 보이던 이 페이지
+     전용 6px 여백(위 .visit-auth-page .page-header)이 스탯 카드와 바로 아래
+     방문 인증 토글 줄을 거의 붙여놓은 것처럼 보이게 한다 — 모바일에서만 넉넉히. */
+  .visit-auth-page .page-header {
+    margin-bottom: 16px;
+  }
+
   .visit-status-bar {
     align-items: flex-start;
   }
@@ -496,6 +503,8 @@ body[data-theme="dark"] .visit-stat-cards {
 .session-card-time {
   font-size: 13px;
   font-weight: 600;
+  /* 인증하기/거절 버튼(28px 높이)과 같은 줄에 있을 때 세로 중앙이 맞도록. */
+  line-height: 28px;
   color: var(--color-text-soft);
   font-variant-numeric: tabular-nums;
 }
