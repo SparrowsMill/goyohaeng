@@ -36,6 +36,16 @@
   --color-accent: #90a83c;
   --color-accent-soft: #eef2d6;
 
+  /* ---- 미리 계산한 혼합색: color-mix()는 Chrome 111+ 라 구형 Android WebView(예: 101)에서
+     선언 전체가 무효가 된다(차트 막대·토글이 안 보임). 원래 식은 각 토큰 옆에 적어둠 ---- */
+  --color-primary-tint: #f2f3f0; /* primary 8% + surface */
+  --color-primary-bar: #c0c5b8; /* primary 38% + white */
+  --color-accent-bar: #cdd8a7; /* accent 45% + white */
+  --color-danger-bar: #dfbcb7; /* danger 45% + white */
+  --color-surface-alt-deep: #efebe2; /* surface-alt 94% + black */
+  --color-border-deep: #aeaa9e; /* border 80% + black */
+  --color-primary-glow-strong: rgba(89, 102, 68, 0.4); /* primary 40% + transparent */
+
   --radius-sm: 0;
   --radius-md: 0;
   --radius-lg: 28px;
@@ -85,6 +95,14 @@ body[data-theme="dark"] {
 
   --color-accent: #c3da79;
   --color-accent-soft: #414c2e;
+
+  --color-primary-tint: #3d3b2c;
+  --color-primary-bar: #e0e8d3;
+  --color-accent-bar: #e4eec3;
+  --color-danger-bar: #f4d7d1;
+  --color-surface-alt-deep: #383427;
+  --color-border-deep: #3e3a2e;
+  --color-primary-glow-strong: rgba(173, 195, 138, 0.4);
 
   --shadow-card: 0 14px 32px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(0, 0, 0, 0.24);
   --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.48);

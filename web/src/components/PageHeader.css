@@ -50,7 +50,7 @@
   gap: 14px;
 }
 
-.page-title-row:has(.page-title-icon-plain) {
+.page-title-row-plain {
   gap: 8px;
 }
 

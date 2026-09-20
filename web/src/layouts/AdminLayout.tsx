@@ -145,7 +145,7 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="admin-content">
+      <main className={`admin-content ${pathname.startsWith("/stats") ? "admin-content-stats" : ""}`}>
         <Outlet />
       </main>
 

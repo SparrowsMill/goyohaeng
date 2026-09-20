@@ -75,7 +75,7 @@ function computeAxis(maxValue: number, headroom = 1.3) {
 
 export default function ComboChart({
   data: dataProp,
-  barColor = "color-mix(in srgb, var(--color-primary) 38%, white)",
+  barColor = "var(--color-primary-bar)",
   lineColor = "var(--color-primary)",
   height = 180,
   barLegend,

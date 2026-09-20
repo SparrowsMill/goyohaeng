@@ -252,9 +252,9 @@ body[data-theme="dark"] .time-range:hover {
   background: var(--color-surface-alt);
 }
 
-.radio-option:has(input:checked) {
+.radio-option.checked {
   border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  background: var(--color-primary-tint);
   color: var(--color-text);
 }
 

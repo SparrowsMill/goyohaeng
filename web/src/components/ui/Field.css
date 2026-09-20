@@ -48,11 +48,13 @@
   color: var(--color-text);
 }
 
-.field-input-wrap:has(.field-icon) .field-input {
+/* :has() 대신 형제/클래스 선택자 사용 — 구형 Android WebView(<105)에서 :has()가 무시되어
+   아이콘과 텍스트가 겹치던 문제 방지 */
+.field-icon + .field-input {
   padding-left: 40px;
 }
 
-.field-input-wrap:has(.field-suffix) .field-input {
+.field-input-wrap.has-suffix .field-input {
   padding-right: 40px;
 }
 

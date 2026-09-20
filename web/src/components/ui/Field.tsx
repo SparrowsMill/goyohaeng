@@ -22,7 +22,7 @@ export default function Field({ label, icon, suffix, hint, error, required, id, 
         </label>
         {hint}
       </div>
-      <div className="field-input-wrap">
+      <div className={`field-input-wrap ${suffix ? "has-suffix" : ""}`}>
         {icon && <span className="field-icon">{icon}</span>}
         <input
           id={fieldId}

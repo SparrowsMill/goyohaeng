@@ -35,7 +35,7 @@ export default function PageHeader({
   return (
     <div className="page-header">
       <div className="page-header-top">
-        <div className={icon ? "page-title-row" : undefined}>
+        <div className={icon ? `page-title-row ${iconPlain ? "page-title-row-plain" : ""}` : undefined}>
           {icon && <span className={`page-title-icon ${iconPlain ? "page-title-icon-plain" : ""}`}>{icon}</span>}
           <div>
             {breadcrumbs && (

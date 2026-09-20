@@ -19,6 +19,7 @@ import Field from "../../components/ui/Field";
 import Skeleton from "../../components/ui/Skeleton";
 import { useToast } from "../../components/ui/Toast";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import { toHttps } from "../../utils/url";
 import { ApiError } from "../../api/client";
 import {
   createBenefit,
@@ -261,8 +262,8 @@ export default function PlaceManagePage() {
             </p>
             {(!editingPhoto || mainImage) && (
               <div
-                className="place-photo-hero"
-                style={mainImage ? { backgroundImage: `url(${mainImage.originalUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+                className={`place-photo-hero ${!editingPhoto && !mainImage ? "place-photo-hero-empty" : ""}`}
+                style={mainImage ? { backgroundImage: `url(${toHttps(mainImage.originalUrl)})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
               >
                 {!editingPhoto && !mainImage && (
                   <div className="place-photo-empty">

@@ -475,7 +475,7 @@ export default function StatsDashboardPage() {
               </button>
             </div>
           </div>
-          <ComboChart data={revisit7.map((d) => ({ label: d.label, bar: d.count }))} detailed height={160} barColor="color-mix(in srgb, var(--color-accent) 45%, white)" />
+          <ComboChart data={revisit7.map((d) => ({ label: d.label, bar: d.count }))} detailed height={160} barColor="var(--color-accent-bar)" />
         </section>
         <section className="panel trend-panel">
           <div className="panel-header">
@@ -512,7 +512,7 @@ export default function StatsDashboardPage() {
               </button>
             </div>
           </div>
-          <ComboChart data={fail7.map((d) => ({ label: d.label, bar: d.count }))} detailed height={160} barColor="color-mix(in srgb, var(--color-danger) 45%, white)" />
+          <ComboChart data={fail7.map((d) => ({ label: d.label, bar: d.count }))} detailed height={160} barColor="var(--color-danger-bar)" />
         </section>
       </div>
 

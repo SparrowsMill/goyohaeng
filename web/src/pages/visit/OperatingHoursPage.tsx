@@ -356,7 +356,7 @@ export default function OperatingHoursPage() {
             </p>
 
             <div className="radio-options">
-              <label className="radio-option">
+              <label className={`radio-option ${hoursMode === "SAME_AS_OPERATING" ? "checked" : ""}`}>
                 <input
                   type="radio"
                   checked={hoursMode === "SAME_AS_OPERATING"}
@@ -364,7 +364,7 @@ export default function OperatingHoursPage() {
                 />
                 매장 운영시간과 동일하게 사용 
               </label>
-              <label className="radio-option">
+              <label className={`radio-option ${hoursMode === "CUSTOM" ? "checked" : ""}`}>
                 <input type="radio" checked={hoursMode === "CUSTOM"} onChange={() => setHoursMode("CUSTOM")} />
                 별도 시간 설정
               </label>
