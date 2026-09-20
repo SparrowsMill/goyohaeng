@@ -129,6 +129,16 @@
   padding: 24px 16px;
 }
 
+/* "고요지수 추세" 제목 + 최근7일/1개월/3개월 탭이 좁은 폭에서 한 줄에 억지로
+   끼워지면서 글자 자체가 줄바꿈되던 것 — 대신 줄 전체를 2줄로 나눠 쌓는다. */
+.panel-header:has(.period-tabs) {
+  flex-wrap: wrap;
+}
+
+.period-tabs button {
+  white-space: nowrap;
+}
+
 .trend-panel .panel-header {
   gap: 14px;
 }
@@ -278,29 +288,82 @@
   margin-top: 2px;
 }
 
-.keyword-chips {
-  display: flex;
-  flex-wrap: wrap;
+/* 고요지수(축소판) + 트렌드 모니터링 진입 카드 — 폰 폭에서도 항상 한 줄에
+   나란히 둔다(다른 .gap-row와 달리 여긴 안 쌓는다). */
+.gap-hero-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.gap-score-panel-compact {
   gap: 8px;
+  padding: 12px;
 }
 
-.keyword-chip {
-  display: inline-flex;
+.gap-score-panel-compact .panel-title {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.trend-monitoring-card {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  height: 26px;
-  padding: 0 10px;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-soft);
-  font-size: 12px;
-  font-weight: 500;
+  gap: 8px;
+  padding: 12px;
   text-decoration: none;
-  color: var(--color-text-soft);
+  color: inherit;
+  background: var(--color-primary-soft);
+  border-color: transparent;
+  transition: filter 0.15s ease;
 }
 
-.keyword-chip:hover {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-soft-text);
+.trend-monitoring-card:hover {
+  filter: brightness(0.97);
+}
+
+.trend-monitoring-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.trend-monitoring-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.trend-monitoring-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.trend-monitoring-card-desc {
+  font-size: 11.5px;
+  color: var(--color-text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.trend-monitoring-card-arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--color-text-faint);
 }
 
 @media (max-width: 1100px) {

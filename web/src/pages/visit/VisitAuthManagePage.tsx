@@ -49,10 +49,9 @@ const STATUS_META: Record<VerificationStatus, { label: string; tone: BadgeTone; 
 
 const FILTERS: { label: string; status?: VerificationStatus; statuses?: VerificationStatus[] }[] = [
   { label: "전체" },
-  { label: "방문 예정", status: "ISSUED" },
-  { label: "인증 완료", status: "VERIFIED" },
-  { label: "시간 만료", status: "EXPIRED" },
-  { label: "취소/거절", statuses: ["CANCELLED", "FAILED"] },
+  { label: "방문예정", status: "ISSUED" },
+  { label: "인증완료", status: "VERIFIED" },
+  { label: "인증실패", statuses: ["EXPIRED", "CANCELLED", "FAILED"] },
 ];
 
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -85,6 +84,22 @@ function formatCountdown(totalSeconds: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+/** "인증 완료 / 만료 시간" 칸(데스크톱 표 컬럼·모바일 상세보기 팝오버 공용). */
+function renderExpiryInfo(s: VisitVerificationListItem, now: number) {
+  if (s.status === "VERIFIED") return formatDateTime(s.verifiedAt);
+  if (s.status !== "ISSUED") return formatDateTime(s.expiresAt);
+  const remaining = Math.max(0, Math.floor((new Date(s.expiresAt).getTime() - now) / 1000));
+  return (
+    <>
+      {formatDateTime(s.expiresAt)}
+      <br />
+      <span className="table-subtext">
+        {remaining > 0 ? `만료까지 ${formatCountdown(remaining)}` : "만료됨"}
+      </span>
+    </>
+  );
+}
+
 export default function VisitAuthManagePage() {
   const { showToast } = useToast();
   const [items, setItems] = useState<VisitVerificationListItem[]>([]);
@@ -105,7 +120,9 @@ export default function VisitAuthManagePage() {
   const [rejectReason, setRejectReason] = useState("");
   const [pendingToggle, setPendingToggle] = useState<boolean | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
-  const [detailInfo, setDetailInfo] = useState<{ id: number; bottom: number; left: number } | null>(null);
+  const [detailInfo, setDetailInfo] = useState<
+    { id: number; bottom: number; left: number; item: VisitVerificationListItem } | null
+  >(null);
   const [detail, setDetail] = useState<VisitVerificationDetail | null>(null);
   const [visitCount, setVisitCount] = useState<number | null>(null);
 
@@ -241,6 +258,7 @@ export default function VisitAuthManagePage() {
       id: item.id,
       bottom: window.innerHeight - rect.top + 10,
       left: Math.min(Math.max(12, rect.right - POPOVER_WIDTH), window.innerWidth - POPOVER_WIDTH - 12),
+      item,
     });
     setDetail(null);
     setVisitCount(null);
@@ -362,6 +380,7 @@ export default function VisitAuthManagePage() {
           </div>
         </div>
 
+        <div className="visit-desktop-table">
         <Table
           rowKey={(s) => s.id}
           data={loading ? [] : items}
@@ -424,20 +443,7 @@ export default function VisitAuthManagePage() {
             {
               key: "expiresAt",
               header: "인증 완료 / 만료 시간",
-              render: (s) => {
-                if (s.status === "VERIFIED") return formatDateTime(s.verifiedAt);
-                if (s.status !== "ISSUED") return formatDateTime(s.expiresAt);
-                const remaining = Math.max(0, Math.floor((new Date(s.expiresAt).getTime() - now) / 1000));
-                return (
-                  <>
-                    {formatDateTime(s.expiresAt)}
-                    <br />
-                    <span className="table-subtext">
-                      {remaining > 0 ? `만료까지 ${formatCountdown(remaining)}` : "만료됨"}
-                    </span>
-                  </>
-                );
-              },
+              render: (s) => renderExpiryInfo(s, now),
             },
             {
               key: "actions",
@@ -450,6 +456,58 @@ export default function VisitAuthManagePage() {
             },
           ]}
         />
+        </div>
+
+        <div className="visit-session-cards">
+          {loading ? (
+            <EmptyState icon={<Search size={18} />} title="불러오는 중..." />
+          ) : items.length === 0 ? (
+            <EmptyState
+              icon={<Search size={18} />}
+              title="조건에 맞는 인증 세션이 없습니다."
+              description="필터나 검색어를 변경해보세요."
+            />
+          ) : (
+            items.map((s) => {
+              const meta = STATUS_META[s.status];
+              const StatusIcon = meta.icon;
+              return (
+                <div key={s.id} className="session-card">
+                  <div className="session-card-row">
+                    <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
+                      {meta.label}
+                    </Badge>
+                    <div className="session-card-code-slot">
+                      <span className="mono session-card-code">{s.verificationCode}</span>
+                    </div>
+                    <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
+                      상세보기 <ChevronRight size={14} />
+                    </button>
+                  </div>
+                  <div className="session-card-row">
+                    <span className="session-card-time">
+                      {formatDateTime(s.expectedArrivalAt ?? s.issuedAt)}
+                    </span>
+                    {s.status === "ISSUED" && (
+                      <div className="session-action-buttons">
+                        <button type="button" className="session-confirm-btn" onClick={() => setApproveTarget(s)}>
+                          <Zap size={11} /> 인증하기
+                        </button>
+                        <button
+                          type="button"
+                          className="session-confirm-btn danger"
+                          onClick={() => setRejectTarget(s)}
+                        >
+                          <Ban size={11} /> 거절
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
 
         <div className="visit-pagination">
           <button
@@ -511,7 +569,7 @@ export default function VisitAuthManagePage() {
         open={approveTarget !== null}
         onClose={() => setApproveTarget(null)}
         title="바로 인증 처리할까요?"
-        description={approveTarget ? `인증번호 ${approveTarget.verificationCode}의 방문을 지금 바로 인증 완료로 처리해요.` : undefined}
+        description={approveTarget ? `인증번호 ${approveTarget.verificationCode}의 방문을 인증 완료로 처리해요.` : undefined}
         footer={
           <>
             <Button variant="secondary" onClick={() => setApproveTarget(null)} disabled={actionBusy}>
@@ -586,6 +644,10 @@ export default function VisitAuthManagePage() {
                 <div>
                   <dt>발급 시각</dt>
                   <dd>{formatDateTime(detail.issuedAt)}</dd>
+                </div>
+                <div>
+                  <dt>인증 완료 / 만료</dt>
+                  <dd>{renderExpiryInfo(detailInfo.item, now)}</dd>
                 </div>
                 {detail.status === "FAILED" && (
                   <div className="session-detail-fail-reason">

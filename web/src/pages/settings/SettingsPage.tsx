@@ -160,7 +160,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <Button onClick={handleChangePassword} disabled={changingPw}>
-            {changingPw ? "변경 중..." : "변경하기"}
+            {changingPw ? "변경 중..." : "변경"}
           </Button>
         </div>
         <div className="settings-field-grid">

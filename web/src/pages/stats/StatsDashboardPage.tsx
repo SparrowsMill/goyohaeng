@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Hash,
   Info,
   Calendar,
   TrendingUp,
@@ -144,8 +143,6 @@ function sum(buckets: DayBucket[]) {
   return buckets.reduce((total, b) => total + b.count, 0);
 }
 
-const keywords = ["한옥마을", "전주여행", "전통체험", "비빔밥", "한복체험", "야경명소", "로컬맛집", "고즈넉한"];
-
 const MAX_WEEK_OFFSET = TREND_DAYS / 7 - 1;
 
 // 백엔드에 등급 기준이 따로 없어서 프론트에서 임의로 나눈 구간이다.
@@ -244,8 +241,8 @@ export default function StatsDashboardPage() {
         }
       />
 
-      <div className="gap-row">
-        <section className="panel gap-score-panel">
+      <div className="gap-hero-row">
+        <section className="panel gap-score-panel gap-score-panel-compact">
           <p className="panel-title">
             <Award size={15} className="gap-score-title-icon" />
             현재 고요지수
@@ -254,19 +251,6 @@ export default function StatsDashboardPage() {
             <>
               <p className="gap-score-value">{Math.round(gapReady.gapScore)}</p>
               {grade && <Badge tone={grade.tone}>{grade.label}</Badge>}
-              {gapReady.regionCategoryAverageGapScore !== null && (
-                <p className="gap-score-compare">
-                  <TrendingUp size={12} />
-                  같은 시군구·카테고리 평균({Math.round(gapReady.regionCategoryAverageGapScore)}) 대비{" "}
-                  <strong>
-                    {gapReady.gapScore - gapReady.regionCategoryAverageGapScore >= 0 ? "+" : ""}
-                    {Math.round(gapReady.gapScore - gapReady.regionCategoryAverageGapScore)}
-                  </strong>
-                </p>
-              )}
-              <p className="gap-score-caption">
-                <Calendar size={11} /> {formatGapDate(gapReady.calculatedAt)} 산출
-              </p>
             </>
           ) : (
             <p className="gap-basis-desc" style={{ marginTop: 8 }}>
@@ -275,6 +259,19 @@ export default function StatsDashboardPage() {
           )}
         </section>
 
+        <Link to="/monitoring" className="panel trend-monitoring-card">
+          <span className="trend-monitoring-card-icon">
+            <TrendingUp size={20} />
+          </span>
+          <span className="trend-monitoring-card-body">
+            <span className="trend-monitoring-card-title">트렌드 모니터링</span>
+            <span className="trend-monitoring-card-desc">장소와 관련된 트렌드를 확인해요.</span>
+          </span>
+          <ChevronRight size={18} className="trend-monitoring-card-arrow" />
+        </Link>
+      </div>
+
+      <div className="gap-row">
         <section className="panel">
           <p className="panel-title" style={{ marginBottom: 4 }}>
             산출 근거
@@ -567,24 +564,6 @@ export default function StatsDashboardPage() {
         </div>
       </section>
 
-      <section className="panel">
-        <div className="panel-header">
-          <div>
-            <p className="panel-title">관련 키워드</p>
-            <p className="funnel-desc">키워드를 누르면 추가 모니터링 페이지로 이동합니다. (목업 데이터)</p>
-          </div>
-          <Link to="/monitoring" className="panel-action">
-            전체 키워드 보기
-          </Link>
-        </div>
-        <div className="keyword-chips">
-          {keywords.map((k) => (
-            <Link to="/monitoring" key={k} className="keyword-chip">
-              <Hash size={11} /> {k}
-            </Link>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

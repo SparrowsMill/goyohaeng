@@ -29,7 +29,6 @@ import {
 import "./OperatingHoursPage.css";
 
 const DAYS = [1, 2, 3, 4, 5, 6, 7];
-const DAY_LABEL: Record<number, string> = { 1: "월요일", 2: "화요일", 3: "수요일", 4: "목요일", 5: "금요일", 6: "토요일", 7: "일요일" };
 const DAY_SHORT: Record<number, string> = { 1: "월", 2: "화", 3: "수", 4: "목", 5: "금", 6: "토", 7: "일" };
 
 function defaultOperatingHours(): OperatingHourItem[] {
@@ -309,7 +308,7 @@ export default function OperatingHoursPage() {
                 <tbody>
                   {hours.map((h) => (
                     <tr key={h.dayOfWeek} className={h.isClosed ? "hours-row-closed" : ""}>
-                      <td className="hours-table-day">{DAY_LABEL[h.dayOfWeek]}</td>
+                      <td className="hours-table-day">{DAY_SHORT[h.dayOfWeek]}</td>
                       <td>
                         <Toggle
                           checked={!h.isClosed}
@@ -414,7 +413,7 @@ export default function OperatingHoursPage() {
                   <tbody>
                     {verificationHours.map((h) => (
                       <tr key={h.dayOfWeek} className={!h.enabled ? "hours-row-closed" : ""}>
-                        <td className="hours-table-day">{DAY_LABEL[h.dayOfWeek]}</td>
+                        <td className="hours-table-day">{DAY_SHORT[h.dayOfWeek]}</td>
                         <td>
                           <Toggle
                             checked={h.enabled}
@@ -482,7 +481,11 @@ export default function OperatingHoursPage() {
                 onChange={(e) => applyBreakToAllDays({ end: e.target.value })}
               />
             </div>
-            <p className="hours-footnote">브레이크타임은 왼쪽 운영시간 저장 버튼을 눌러야 반영됩니다.</p>
+            <div className="report-actions" style={{ justifyContent: "flex-end", marginTop: 14 }}>
+              <Button onClick={saveOperatingHours} disabled={savingHours}>
+                {savingHours ? "등록 중..." : "브레이크타임 등록"}
+              </Button>
+            </div>
           </section>
 
           <section className="panel">

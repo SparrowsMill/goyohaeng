@@ -22,7 +22,7 @@ export default function ReportErrorPage() {
         title="정보 오류 신고"
         breadcrumbs={[
           { label: "통계 데이터 보드", to: "/stats" },
-          { label: "키워드 모니터링", to: "/monitoring" },
+          { label: "트렌드 모니터링", to: "/monitoring" },
           { label: "정보 오류 신고" },
         ]}
         showVisitToggle

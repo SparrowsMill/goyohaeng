@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Sparkles, ExternalLink, MessageCircle, TrendingUp, TrendingDown, Minus, Search } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
-import DonutChart from "../../components/charts/DonutChart";
 import ComboChart from "../../components/charts/ComboChart";
 import Skeleton from "../../components/ui/Skeleton";
 import EmptyState from "../../components/ui/EmptyState";
@@ -12,26 +11,6 @@ import { ApiError } from "../../api/client";
 import { getNaverAnalytics, type NaverAnalytics } from "../../api/analytics";
 import { getPlaceTrendSummary, type PlaceTrendSummary } from "../../api/place";
 import "./MonitoringPage.css";
-
-// 아래 목업 데이터(TOP 키워드, 채널별 언급 비중, AI 요약)는
-// 백엔드 API 범위 밖(스펙 20장 참고)이라 아직 실제 데이터로 대체할 수 없다.
-const topKeywords = [
-  { rank: 1, tag: "전주여행", ratio: 18.7 },
-  { rank: 2, tag: "한옥체험", ratio: 13.8 },
-  { rank: 3, tag: "전주비빔밥", ratio: 10.9 },
-  { rank: 4, tag: "감성사진명소", ratio: 9.6 },
-  { rank: 5, tag: "야경", ratio: 8.3 },
-  { rank: 6, tag: "한복대여", ratio: 7.6 },
-  { rank: 7, tag: "전통시장", ratio: 5.4 },
-  { rank: 8, tag: "골목산책", ratio: 5.3 },
-];
-
-const channelSegments = [
-  { label: "블로그", value: 5216, color: "var(--color-primary)" },
-  { label: "인스타그램", value: 3276, color: "#c98a4f" },
-  { label: "유튜브", value: 2104, color: "#d9c368" },
-  { label: "기타 SNS/웹", value: 2268, color: "#c9c2ab" },
-];
 
 const CONTENT_TYPE_LABEL: Record<string, string> = {
   NAVER_BLOG: "블로그",
@@ -77,8 +56,8 @@ export default function MonitoringPage() {
   return (
     <>
       <PageHeader
-        title="키워드 모니터링"
-        breadcrumbs={[{ label: "통계 데이터 보드", to: "/stats" }, { label: "키워드 모니터링" }]}
+        title="트렌드 모니터링"
+        breadcrumbs={[{ label: "통계 데이터 보드", to: "/stats" }, { label: "트렌드 모니터링" }]}
         hideSettings
       />
 
@@ -127,98 +106,74 @@ export default function MonitoringPage() {
           </>
         )}
         <p className="hours-footnote" style={{ marginTop: 8 }}>
-          ratio는 실제 검색 횟수가 아니라 상대적인 검색 관심도예요.
+          실제 검색 횟수가 아니라 상대적인 검색 관심도예요.
         </p>
       </section>
 
-      <div className="grid grid-2" style={{ marginBottom: 12, gridTemplateColumns: "1.6fr 1fr" }}>
+      <div className="grid monitoring-keyword-row" style={{ marginBottom: 12 }}>
         <section className="panel">
-          <p className="panel-title">최근 많이 언급되는 키워드 TOP 8 (목업 데이터)</p>
-          <div className="keyword-top-grid">
-            {topKeywords.map((k) => (
-              <div className="keyword-top-item" key={k.rank}>
-                <span className="keyword-top-rank">{k.rank}</span>
-                <div>
-                  <p className="keyword-top-tag">#{k.tag}</p>
-                  <p className="keyword-top-ratio">언급 비율 {k.ratio}%</p>
+          <p className="panel-title">최근 많이 언급되는 키워드</p>
+          {trendLoading ? (
+            showTrendSkeleton ? <Skeleton height={140} /> : null
+          ) : !trend || trend.keywords.length === 0 ? (
+            <EmptyState icon={<Search size={18} />} title="아직 수집된 키워드가 없습니다." />
+          ) : (
+            <div className="keyword-top-grid">
+              {trend.keywords.slice(0, 8).map((tag, i) => (
+                <div className="keyword-top-item" key={tag}>
+                  <span className="keyword-top-rank">{i + 1}</span>
+                  <p className="keyword-top-tag">#{tag}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="panel ai-summary-panel">
           <p className="panel-title">
-            <Sparkles size={15} /> AI 요약 관심 포인트 (목업 데이터)
+            <Sparkles size={15} /> AI 요약 관심 포인트
           </p>
-          <p className="ai-summary-text">
-            최근 전주 한옥마을은 감성적인 사진 명소와 한옥 체험에 대한 관심이 높습니다. 전주비빔밥, 감성 분위기 등
-            지역 먹거리와 야경, 한복대여가 주요 관심사로 보이며, 야간 관광과 골목 산책 등 저녁 시간대 활동 정보도
-            주목받고 있습니다.
-          </p>
-        </section>
-      </div>
-
-      <div className="grid grid-2" style={{ gridTemplateColumns: "1.6fr 1fr", alignItems: "start" }}>
-        <section className="panel">
-          <p className="panel-title">관련 블로그 언급</p>
           {trendLoading ? (
-            showTrendSkeleton ? <Skeleton height={200} /> : null
-          ) : !trend || trend.contents.length === 0 ? (
-            <EmptyState icon={<MessageCircle size={18} />} title="아직 수집된 블로그 언급이 없습니다." />
+            showTrendSkeleton ? <Skeleton height={140} /> : null
+          ) : !trend || !trend.summaryText ? (
+            <EmptyState icon={<Sparkles size={18} />} title="아직 생성된 AI 요약이 없습니다." />
           ) : (
-            <ul className="post-list">
-              {trend.contents.map((c) => (
-                <li key={c.id}>
-                  <a href={c.url} target="_blank" rel="noreferrer" style={{ display: "contents" }}>
-                    <span className="post-channel">
-                      <MessageCircle size={14} />
-                      {CONTENT_TYPE_LABEL[c.contentType] ?? c.contentType}
-                    </span>
-                    <div className="post-body">
-                      <p className="post-title">{c.title ?? "(제목 없음)"}</p>
-                      <p className="post-desc">{c.author ? `작성자: ${c.author}` : ""}</p>
-                    </div>
-                    <span className="post-date">
-                      {c.publishedAt
-                        ? new Date(c.publishedAt).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
-                        : "-"}
-                    </span>
-                    <ExternalLink size={14} className="post-link-icon" />
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <p className="ai-summary-text">{trend.summaryText}</p>
           )}
         </section>
-
-        <div className="stack">
-          <section className="panel">
-            <p className="panel-title">채널별 언급 비중 (목업 데이터)</p>
-            <DonutChart segments={channelSegments} centerLabel="12,864 건" />
-          </section>
-
-          <section className="panel">
-            <p className="panel-title">최근 언급 현황 (목업 데이터)</p>
-            <div className="mention-stat-grid">
-              <div>
-                <span className="mention-stat-icon">
-                  <MessageCircle size={16} />
-                </span>
-                <p className="mention-stat-value">12,864건</p>
-                <p className="mention-stat-label">전주 한옥마을 관련 전체 언급 수</p>
-              </div>
-              <div>
-                <span className="mention-stat-icon success">
-                  <TrendingUp size={16} />
-                </span>
-                <p className="mention-stat-value success">+18.6%</p>
-                <p className="mention-stat-label">전주(10,846건) 대비</p>
-              </div>
-            </div>
-          </section>
-        </div>
       </div>
+
+      <section className="panel">
+        <p className="panel-title">관련 블로그 언급</p>
+        {trendLoading ? (
+          showTrendSkeleton ? <Skeleton height={200} /> : null
+        ) : !trend || trend.contents.length === 0 ? (
+          <EmptyState icon={<MessageCircle size={18} />} title="아직 수집된 블로그 언급이 없습니다." />
+        ) : (
+          <ul className="post-list">
+            {trend.contents.map((c) => (
+              <li key={c.id}>
+                <a href={c.url} target="_blank" rel="noreferrer" style={{ display: "contents" }}>
+                  <span className="post-channel">
+                    <MessageCircle size={14} />
+                    {CONTENT_TYPE_LABEL[c.contentType] ?? c.contentType}
+                  </span>
+                  <div className="post-body">
+                    <p className="post-title">{c.title ?? "(제목 없음)"}</p>
+                    <p className="post-desc">{c.author ? `작성자: ${c.author}` : ""}</p>
+                  </div>
+                  <span className="post-date">
+                    {c.publishedAt
+                      ? new Date(c.publishedAt).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })
+                      : "-"}
+                  </span>
+                  <ExternalLink size={14} className="post-link-icon" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </>
   );
 }

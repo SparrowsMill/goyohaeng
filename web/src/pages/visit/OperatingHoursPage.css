@@ -9,12 +9,12 @@
   font-weight: 600;
   color: var(--color-text-faint);
   font-size: 11.5px;
-  padding: 8px 6px;
+  padding: 8px 4px;
   border-bottom: 1px solid var(--color-border-soft);
 }
 
 .hours-table td {
-  padding: 8px 6px;
+  padding: 6px 4px;
   border-bottom: 1px solid var(--color-border-soft);
 }
 
@@ -52,6 +52,7 @@
 
 input[type="time"] {
   width: auto;
+  max-width: 78px;
 }
 
 input[type="time"]::-webkit-datetime-edit {
@@ -69,9 +70,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   display: inline-flex;
   width: fit-content;
   align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 10px;
+  gap: 4px;
+  height: 30px;
+  padding: 0 8px;
   border-radius: 999px;
   border: 1px solid #dcdcda;
   background: #f0f0ee;
@@ -104,7 +105,7 @@ body[data-theme="dark"] .time-range:hover {
   padding: 0;
   height: auto;
   width: auto;
-  font-size: 12.5px;
+  font-size: 11.5px;
   color: var(--color-text);
 }
 

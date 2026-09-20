@@ -4,6 +4,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 24px;
+  min-width: 0;
 }
 
 .panel-tint {
@@ -124,6 +125,7 @@ body[data-theme="dark"] .panel {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
 }
 
 .table-wrap {
