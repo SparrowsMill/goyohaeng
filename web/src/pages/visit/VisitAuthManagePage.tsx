@@ -474,10 +474,10 @@ export default function VisitAuthManagePage() {
               return (
                 <div key={s.id} className="session-card">
                   <div className="session-card-row">
-                    <div className="session-card-row-left">
-                      <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
-                        {meta.label}
-                      </Badge>
+                    <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
+                      {meta.label}
+                    </Badge>
+                    <div className="session-card-code-slot">
                       <span className="mono session-card-code">{s.verificationCode}</span>
                     </div>
                     <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
