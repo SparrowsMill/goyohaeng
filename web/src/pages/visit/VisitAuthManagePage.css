@@ -433,7 +433,7 @@ body[data-theme="dark"] .visit-stat-cards {
   }
 
   .visit-status-bar {
-    align-items: flex-start;
+    align-items: center;
   }
   .visit-status-divider {
     display: none;

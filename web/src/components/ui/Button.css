@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   gap: 6px;
   height: 34px;
   padding: 0 16px;
@@ -9,6 +10,7 @@
   border: 1px solid transparent;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
   transition: filter 0.15s ease, background-color 0.15s ease, border-color 0.15s ease,
     transform 0.08s ease, box-shadow 0.15s ease;
 }
