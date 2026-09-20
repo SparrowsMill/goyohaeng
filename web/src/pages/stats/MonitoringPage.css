@@ -39,12 +39,6 @@
   font-weight: 700;
 }
 
-.keyword-top-ratio {
-  font-size: 11px;
-  color: var(--color-text-faint);
-  margin-top: 2px;
-}
-
 .ai-summary-panel {
   background: var(--color-primary-soft);
   border-color: #d9e2c4;
