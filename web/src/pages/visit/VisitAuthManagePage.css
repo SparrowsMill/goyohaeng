@@ -450,4 +450,50 @@ body[data-theme="dark"] .visit-stat-cards {
   .visit-stat-card-label {
     font-size: 11px;
   }
+
+  /* 표(6자리 인증번호/작업/상태/방문 예정 시간/인증 완료 시간)가 폰 폭에
+     다 안 들어와 가로 스크롤에 기대야 했던 것을, 행 하나를 "라벨 위·값
+     아래"로 쌓이는 카드로 바꿔 스크롤 없이 다 보이게 한다. 라벨은 Table
+     컴포넌트가 각 td에 심어주는 data-label(컬럼 header)에서 가져온다. */
+  .visit-auth-page .data-table thead {
+    display: none;
+  }
+
+  .visit-auth-page .data-table,
+  .visit-auth-page .data-table tbody,
+  .visit-auth-page .data-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .visit-auth-page .data-table tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 14px;
+    padding: 2px 14px;
+  }
+
+  .visit-auth-page .data-table tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .visit-auth-page .data-table td:not(.data-table-empty) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border-soft);
+  }
+
+  .visit-auth-page .data-table tr td:last-child:not(.data-table-empty) {
+    border-bottom: none;
+  }
+
+  .visit-auth-page .data-table td[data-label]::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-faint);
+  }
 }
