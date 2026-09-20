@@ -56,8 +56,8 @@ export default function MonitoringPage() {
   return (
     <>
       <PageHeader
-        title="키워드 모니터링"
-        breadcrumbs={[{ label: "통계 데이터 보드", to: "/stats" }, { label: "키워드 모니터링" }]}
+        title="트렌드 모니터링"
+        breadcrumbs={[{ label: "통계 데이터 보드", to: "/stats" }, { label: "트렌드 모니터링" }]}
         hideSettings
       />
 
