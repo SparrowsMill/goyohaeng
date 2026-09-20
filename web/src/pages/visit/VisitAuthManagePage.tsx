@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import Badge, { type BadgeTone } from "../../components/ui/Badge";
@@ -80,6 +79,13 @@ function formatDateTime(value: string | null) {
   });
 }
 
+/** 모바일 카드의 방문 예정 시간 — 날짜·오전/오후 없이 24시간 HH:mm만. */
+function formatTimeOnly(value: string | null) {
+  if (!value) return "-";
+  const d = new Date(value);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 function formatCountdown(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
@@ -127,8 +133,6 @@ export default function VisitAuthManagePage() {
   >(null);
   const [detail, setDetail] = useState<VisitVerificationDetail | null>(null);
   const [visitCount, setVisitCount] = useState<number | null>(null);
-  // 모바일 카드 목록에서 인증번호를 눌러 펼친 행(인증하기/거절 버튼을 그때만 보여줌).
-  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
 
   const loadList = useCallback(() => {
     setLoading(true);
@@ -475,47 +479,38 @@ export default function VisitAuthManagePage() {
             items.map((s) => {
               const meta = STATUS_META[s.status];
               const StatusIcon = meta.icon;
-              const expandable = s.status === "ISSUED";
-              const expanded = expandable && expandedRowId === s.id;
               return (
                 <div key={s.id} className="session-card">
-                  <button
-                    type="button"
-                    className="session-card-head"
-                    disabled={!expandable}
-                    onClick={() => setExpandedRowId((id) => (id === s.id ? null : s.id))}
-                  >
-                    <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
-                      {meta.label}
-                    </Badge>
-                    <span className="mono session-card-code">{s.verificationCode}</span>
-                    {expandable && (
-                      <ChevronDown
-                        size={16}
-                        className={`session-card-chevron ${expanded ? "open" : ""}`}
-                      />
-                    )}
-                  </button>
-                  <p className="session-card-scheduled">
-                    {formatDateTime(s.expectedArrivalAt ?? s.issuedAt)} 방문 예정
-                  </p>
-                  {expanded && (
-                    <div className="session-action-buttons">
-                      <button type="button" className="session-confirm-btn" onClick={() => setApproveTarget(s)}>
-                        <Zap size={11} /> 인증하기
-                      </button>
-                      <button
-                        type="button"
-                        className="session-confirm-btn danger"
-                        onClick={() => setRejectTarget(s)}
-                      >
-                        <Ban size={11} /> 거절
-                      </button>
+                  <div className="session-card-row">
+                    <div className="session-card-row-left">
+                      <Badge tone={meta.tone} icon={<StatusIcon size={12} />}>
+                        {meta.label}
+                      </Badge>
+                      <span className="session-card-time">
+                        {formatTimeOnly(s.expectedArrivalAt ?? s.issuedAt)}
+                      </span>
                     </div>
-                  )}
-                  <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
-                    상세보기 <ChevronRight size={14} />
-                  </button>
+                    <button type="button" className="session-detail-trigger" onClick={toggleDetail(s)}>
+                      상세보기 <ChevronRight size={14} />
+                    </button>
+                  </div>
+                  <div className="session-card-row">
+                    <span className="mono session-card-code">{s.verificationCode}</span>
+                    {s.status === "ISSUED" && (
+                      <div className="session-action-buttons">
+                        <button type="button" className="session-confirm-btn" onClick={() => setApproveTarget(s)}>
+                          <Zap size={11} /> 인증하기
+                        </button>
+                        <button
+                          type="button"
+                          className="session-confirm-btn danger"
+                          onClick={() => setRejectTarget(s)}
+                        >
+                          <Ban size={11} /> 거절
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })

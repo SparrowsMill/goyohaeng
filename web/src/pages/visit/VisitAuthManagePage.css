@@ -472,25 +472,32 @@ body[data-theme="dark"] .visit-stat-cards {
 }
 
 .session-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   border: 1px solid var(--color-border-soft);
   border-radius: 14px;
   padding: 12px 14px;
 }
 
-.session-card-head {
+.session-card-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  font-family: inherit;
-  text-align: left;
 }
 
-.session-card-head:disabled {
-  cursor: default;
+.session-card-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-card-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-soft);
+  font-variant-numeric: tabular-nums;
 }
 
 .session-card-code {
@@ -499,26 +506,6 @@ body[data-theme="dark"] .visit-stat-cards {
   color: var(--color-text);
 }
 
-.session-card-chevron {
-  margin-left: auto;
-  color: var(--color-text-faint);
-  transition: transform 0.15s ease;
-}
-
-.session-card-chevron.open {
-  transform: rotate(180deg);
-}
-
-.session-card-scheduled {
-  margin: 6px 0 0;
-  font-size: 12.5px;
-  color: var(--color-text-soft);
-}
-
-.session-card .session-action-buttons {
-  margin-top: 10px;
-}
-
 .session-card .session-detail-trigger {
-  margin-top: 10px;
+  flex-shrink: 0;
 }
