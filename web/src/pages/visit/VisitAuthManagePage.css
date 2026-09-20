@@ -434,6 +434,9 @@ body[data-theme="dark"] .visit-stat-cards {
 
   .visit-status-bar {
     align-items: center;
+    /* 토글/운영시간 줄 전체를 살짝 오른쪽으로 — 카드 왼쪽 모서리에 바로
+       붙어 보이던 것을 완화한다. */
+    padding-left: 10px;
   }
   .visit-status-divider {
     display: none;

@@ -482,7 +482,11 @@ export default function OperatingHoursPage() {
                 onChange={(e) => applyBreakToAllDays({ end: e.target.value })}
               />
             </div>
-            <p className="hours-footnote">브레이크타임은 왼쪽 운영시간 저장 버튼을 눌러야 반영됩니다.</p>
+            <div className="report-actions" style={{ justifyContent: "flex-end", marginTop: 14 }}>
+              <Button onClick={saveOperatingHours} disabled={savingHours}>
+                {savingHours ? "등록 중..." : "브레이크타임 등록"}
+              </Button>
+            </div>
           </section>
 
           <section className="panel">

@@ -5,6 +5,12 @@
   margin-top: 4px;
 }
 
+/* 최근 많이 언급되는 키워드 + AI 요약 관심 포인트 줄 — 데스크톱은 나란히,
+   폰 폭에서는 하나씩 세로로. */
+.monitoring-keyword-row {
+  grid-template-columns: 1.6fr 1fr;
+}
+
 .keyword-top-item {
   display: flex;
   align-items: center;
@@ -180,6 +186,9 @@
 @media (max-width: 480px) {
   .keyword-top-grid,
   .mention-stat-grid {
+    grid-template-columns: 1fr;
+  }
+  .monitoring-keyword-row {
     grid-template-columns: 1fr;
   }
 }
